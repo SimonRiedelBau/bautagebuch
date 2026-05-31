@@ -34,7 +34,7 @@ button:hover:not(:disabled){filter:brightness(.92)}
 @media(display-mode:standalone){#pwa-btn{display:none!important}}
 </style>
 <script>
-if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9ImJ0Yi12MyI7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJpbnN0YWxsIixlPT57ZS53YWl0VW50aWwoY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oYz0+Yy5hZGRBbGwoWyIuLyJdKSkudGhlbigoKT0+c2VsZi5za2lwV2FpdGluZygpKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJhY3RpdmF0ZSIsZT0+e2Uud2FpdFVudGlsKGNsaWVudHMuY2xhaW0oKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsZT0+e2UucmVzcG9uZFdpdGgoY2FjaGVzLm1hdGNoKGUucmVxdWVzdCkudGhlbihyPT5yfHxmZXRjaChlLnJlcXVlc3QpLmNhdGNoKCgpPT5jYWNoZXMubWF0Y2goIi4vIikpKSk7fSk7");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
+if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9ImJ0Yi12NCI7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJpbnN0YWxsIixlPT57ZS53YWl0VW50aWwoY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oYz0+Yy5hZGRBbGwoWyIuLyJdKSkudGhlbigoKT0+c2VsZi5za2lwV2FpdGluZygpKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJhY3RpdmF0ZSIsZT0+e2Uud2FpdFVudGlsKGNsaWVudHMuY2xhaW0oKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsZT0+e2UucmVzcG9uZFdpdGgoY2FjaGVzLm1hdGNoKGUucmVxdWVzdCkudGhlbihyPT5yfHxmZXRjaChlLnJlcXVlc3QpLmNhdGNoKCgpPT5jYWNoZXMubWF0Y2goIi4vIikpKSk7fSk7");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
 let dp=null;
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();dp=e;setTimeout(()=>{const b=document.getElementById("pwa-btn");if(b)b.style.display="block";},2000);});
 function installPWA(){if(dp){dp.prompt();dp.userChoice.then(()=>{dp=null;const b=document.getElementById("pwa-btn");if(b)b.style.display="none";});}else{alert("iPhone: Teile-Symbol tippen, dann Zum Home-Bildschirm");}}
@@ -461,9 +461,12 @@ function App(){
     setToken(null);setUser(null);setProfil(null);
   }
 
-  // Load profile
+  // Load profile - non-blocking
   useEffect(function(){
     if(!token||!user)return;
+    // Set basic profile immediately so UI works
+    setProfil({id:user.id,email:user.email,name:user.user_metadata&&user.user_metadata.full_name||user.email,rolle:'projektleiter'});
+    // Then try to load from DB
     sb.from('profiles',token).then(function(t){
       return t.select('*','id=eq.'+user.id);
     }).then(function(data){
@@ -741,7 +744,7 @@ function App(){
     </div>
 
     {/* Projekt-Switcher */}
-    {projekte.length>0&&(
+    {(
     <div style={{background:'#1a1a1a',padding:'0 20px',display:'flex',alignItems:'center',gap:4,overflowX:'auto',minHeight:40}}>
       <span style={{fontSize:11,color:'#888',marginRight:6,whiteSpace:'nowrap',fontWeight:600}}>PROJEKT:</span>
       {projekte.map(function(p){return(
@@ -983,11 +986,9 @@ function App(){
         </div>
       </div>
       {/* Neues Projekt */}
-      {profil&&(profil.rolle==='projektleiter'||profil.rolle==='bauleiter')&&(
       <div style={C.card}><div style={C.sh}>Neues Projekt anlegen</div>
         <NeuProjekt onSave={projektErstellen}/>
       </div>
-      )}
       {/* Alle Projekte */}
       <div style={C.card}><div style={C.sh}>Projekte</div>
         {projekte.length===0&&<div style={{fontSize:13,color:'#888'}}>Noch keine Projekte. Oben anlegen.</div>}
