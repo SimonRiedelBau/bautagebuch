@@ -34,7 +34,7 @@ button:hover:not(:disabled){filter:brightness(.92)}
 @media(display-mode:standalone){#pwa-btn{display:none!important}}
 </style>
 <script>
-if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9ImJ0Yi12NCI7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJpbnN0YWxsIixlPT57ZS53YWl0VW50aWwoY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oYz0+Yy5hZGRBbGwoWyIuLyJdKSkudGhlbigoKT0+c2VsZi5za2lwV2FpdGluZygpKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJhY3RpdmF0ZSIsZT0+e2Uud2FpdFVudGlsKGNsaWVudHMuY2xhaW0oKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsZT0+e2UucmVzcG9uZFdpdGgoY2FjaGVzLm1hdGNoKGUucmVxdWVzdCkudGhlbihyPT5yfHxmZXRjaChlLnJlcXVlc3QpLmNhdGNoKCgpPT5jYWNoZXMubWF0Y2goIi4vIikpKSk7fSk7");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
+if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9ImJ0Yi12NSI7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJpbnN0YWxsIixlPT57ZS53YWl0VW50aWwoY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oYz0+Yy5hZGRBbGwoWyIuLyJdKSkudGhlbigoKT0+c2VsZi5za2lwV2FpdGluZygpKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJhY3RpdmF0ZSIsZT0+e2Uud2FpdFVudGlsKGNsaWVudHMuY2xhaW0oKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsZT0+e2UucmVzcG9uZFdpdGgoY2FjaGVzLm1hdGNoKGUucmVxdWVzdCkudGhlbihyPT5yfHxmZXRjaChlLnJlcXVlc3QpLmNhdGNoKCgpPT5jYWNoZXMubWF0Y2goIi4vIikpKSk7fSk7");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
 let dp=null;
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();dp=e;setTimeout(()=>{const b=document.getElementById("pwa-btn");if(b)b.style.display="block";},2000);});
 function installPWA(){if(dp){dp.prompt();dp.userChoice.then(()=>{dp=null;const b=document.getElementById("pwa-btn");if(b)b.style.display="none";});}else{alert("iPhone: Teile-Symbol tippen, dann Zum Home-Bildschirm");}}
@@ -416,6 +416,93 @@ function FehlendDialog({fehlend,form,onChange,onClose,onSave}){
   </div>);
 }
 
+
+// ── Projekt Einstellungen Component ──────────────────────────────
+function ProjektEinstellungen({projekt,token,onUpdate}){
+  var [name,setName]=useState(projekt.name||'');
+  var [bauNr,setBauNr]=useState(projekt.bau_nr||'');
+  var [ort,setOrt]=useState(projekt.ort||'');
+  var [geo,setGeo]=useState([]);
+  var [lat,setLat]=useState(projekt.lat||null);
+  var [lon,setLon]=useState(projekt.lon||null);
+  var [saving,setSaving]=useState(false);
+  var [saved,setSaved]=useState(false);
+
+  useEffect(function(){
+    setName(projekt.name||'');
+    setBauNr(projekt.bau_nr||'');
+    setOrt(projekt.ort||'');
+    setLat(projekt.lat||null);
+    setLon(projekt.lon||null);
+  },[projekt.id]);
+
+  function searchGeo(q){
+    if(!q||q.length<2){setGeo([]);return;}
+    fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(q)+'&count=5&language=de')
+      .then(function(r){return r.json();}).then(function(d){setGeo(d.results||[]);}).catch(function(){});
+  }
+
+  async function save(){
+    setSaving(true);
+    try{
+      var t=await sb.from('projekte',token);
+      var payload={name:name};
+      if(bauNr)payload.bau_nr=bauNr;
+      if(ort)payload.ort=ort;
+      if(lat)payload.lat=lat;
+      if(lon)payload.lon=lon;
+      var updated=await t.update(payload,'id=eq.'+projekt.id);
+      if(Array.isArray(updated)&&updated[0]){
+        onUpdate(updated[0]);
+      } else {
+        onUpdate({...projekt,...payload});
+      }
+      setSaved(true);
+      setTimeout(function(){setSaved(false);},2000);
+    }catch(e){alert('Fehler beim Speichern: '+e.message);}
+    setSaving(false);
+  }
+
+  var inp={width:'100%',padding:'7px 10px',border:'1.5px solid #e0ddd8',borderRadius:6,
+    fontSize:13,background:'#fafaf9',boxSizing:'border-box',marginBottom:10,fontFamily:'inherit'};
+  var lb={fontSize:11,fontWeight:600,color:'#888',textTransform:'uppercase',letterSpacing:.5,display:'block',marginBottom:3};
+
+  return(
+  <div style={{background:'#fff',borderRadius:10,padding:'16px 18px',marginBottom:14,boxShadow:'0 1px 4px rgba(0,0,0,.07)'}}>
+    <div style={{fontWeight:700,fontSize:12,letterSpacing:1,textTransform:'uppercase',color:'#CC0000',marginBottom:12}}>
+      Projektdetails
+    </div>
+    <label style={lb}>Projektname / BVH-Bezeichnung</label>
+    <input style={inp} value={name} onChange={function(e){setName(e.target.value);}}/>
+    <label style={lb}>Bau-Nr.</label>
+    <input style={inp} value={bauNr} onChange={function(e){setBauNr(e.target.value);}} placeholder="z.B. 7421341"/>
+    <label style={lb}>Ort der Baustelle (für automatisches Wetter)</label>
+    <input style={inp} value={ort} onChange={function(e){setOrt(e.target.value);searchGeo(e.target.value);}} placeholder="z.B. München"/>
+    {geo.length>0&&(
+      <div style={{background:'#fff',border:'1px solid #e0ddd8',borderRadius:6,marginBottom:10,overflow:'hidden'}}>
+        {geo.map(function(r){return(
+          <div key={r.id} onClick={function(){
+            setOrt(r.name+(r.admin1?', '+r.admin1:''));
+            setLat(r.latitude);setLon(r.longitude);setGeo([]);
+          }} style={{padding:'9px 12px',cursor:'pointer',fontSize:13,borderBottom:'1px solid #f0efed'}}>
+            {r.name}{r.admin1?', '+r.admin1:''}{r.country?', '+r.country:''}
+          </div>
+        );})}
+      </div>
+    )}
+    {lat&&<div style={{fontSize:12,color:'#2E7D32',marginBottom:10}}>
+      Koordinaten gesetzt: {lat.toFixed(4)}, {lon.toFixed(4)}
+    </div>}
+    <button onClick={save} disabled={saving}
+      style={{width:'100%',padding:10,background:saved?'#2E7D32':'#CC0000',color:'#fff',border:'none',
+        borderRadius:7,cursor:'pointer',fontWeight:700,fontSize:13,fontFamily:'inherit',
+        opacity:saving?.7:1,transition:'background .3s'}}>
+      {saving?'Speichert...':saved?'Gespeichert!':'Einstellungen speichern'}
+    </button>
+  </div>);
+}
+
+
 // ── Hauptapp ──────────────────────────────────────────────────────
 function App(){
   // Auth state
@@ -743,20 +830,34 @@ function App(){
       </div>
     </div>
 
-    {/* Projekt-Switcher */}
-    {(
-    <div style={{background:'#1a1a1a',padding:'0 20px',display:'flex',alignItems:'center',gap:4,overflowX:'auto',minHeight:40}}>
-      <span style={{fontSize:11,color:'#888',marginRight:6,whiteSpace:'nowrap',fontWeight:600}}>PROJEKT:</span>
+    {/* Projekt-Switcher mit + Button */}
+    <div style={{background:'#1a1a1a',padding:'0 20px',display:'flex',alignItems:'center',gap:4,overflowX:'auto',minHeight:42}}>
+      <span style={{fontSize:11,color:'#888',marginRight:6,whiteSpace:'nowrap',fontWeight:600}}>PROJEKTE:</span>
       {projekte.map(function(p){return(
-        <button key={p.id} onClick={function(){setAktivProjekt(p);setForm(mkForm());setMsgs([]);histRef.current=[];}}
-          style={{padding:'5px 12px',fontSize:12,border:'none',borderRadius:4,cursor:'pointer',fontWeight:600,whiteSpace:'nowrap',fontFamily:'inherit',
-            background:aktivProjekt&&aktivProjekt.id===p.id?'#CC0000':'#2a2a2a',
-            color:aktivProjekt&&aktivProjekt.id===p.id?'#fff':'#aaa'}}>
-          {aktivProjekt&&aktivProjekt.id===p.id?'* ':''}{p.name}
-        </button>
+        <div key={p.id} style={{display:'flex',alignItems:'center',marginRight:2}}>
+          <button onClick={function(){setAktivProjekt(p);setForm(mkForm());setMsgs([]);histRef.current=[];}}
+            onDoubleClick={function(){setTab('setup');setAktivProjekt(p);}}
+            title="Klicken: wechseln | Doppelklick: Einstellungen"
+            style={{padding:'5px 12px',fontSize:12,border:'none',borderRadius:4,cursor:'pointer',fontWeight:600,
+              whiteSpace:'nowrap',fontFamily:'inherit',
+              background:aktivProjekt&&aktivProjekt.id===p.id?'#CC0000':'#2a2a2a',
+              color:aktivProjekt&&aktivProjekt.id===p.id?'#fff':'#aaa',
+              borderBottom:aktivProjekt&&aktivProjekt.id===p.id?'2px solid #ff4444':'2px solid transparent'}}>
+            {aktivProjekt&&aktivProjekt.id===p.id?'* ':''}{p.name}
+          </button>
+        </div>
       );})}
+      <button onClick={async function(){
+        var name='Neues Projekt '+(projekte.length+1);
+        await projektErstellen(name,'','');
+        setTab('setup');
+      }} style={{padding:'5px 14px',fontSize:12,border:'1px dashed #444',borderRadius:4,
+        cursor:'pointer',background:'transparent',color:'#888',marginLeft:4,
+        whiteSpace:'nowrap',fontFamily:'inherit'}}>
+        + Projekt
+      </button>
+      <span style={{fontSize:10,color:'#555',marginLeft:8,whiteSpace:'nowrap'}}>Doppelklick = Einstellungen</span>
     </div>
-    )}
 
     {/* Tabs */}
     <div style={{display:'flex',gap:2,background:'#e8e5e0',padding:'6px 20px 0'}}>
@@ -977,6 +1078,14 @@ function App(){
     {/* ── EINSTELLUNGEN ── */}
     {tab==='setup'&&(
     <div>
+      {/* Aktuelles Projekt konfigurieren */}
+      {aktivProjekt&&<div style={{...C.card,background:'#FFF8F0',border:'1px solid #f0ddb0',padding:'12px 16px',marginBottom:10}}>
+        <span style={{fontSize:13,color:'#8B6914',fontWeight:700}}>Einstellungen für: {aktivProjekt.name}</span>
+      </div>}
+      {aktivProjekt&&<ProjektEinstellungen projekt={aktivProjekt} token={token} onUpdate={function(updated){
+        setAktivProjekt(updated);
+        ladeProjekte();
+      }}/>}
       {/* Profil */}
       <div style={C.card}><div style={C.sh}>Mein Profil</div>
         <div style={{fontSize:13,color:'#555',lineHeight:2}}>
