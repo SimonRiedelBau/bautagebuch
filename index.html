@@ -34,7 +34,7 @@ button:hover:not(:disabled){filter:brightness(.92)}
 @media(display-mode:standalone){#pwa-btn{display:none!important}}
 </style>
 <script>
-if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9ImJ0Yi12OCI7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJpbnN0YWxsIixlPT57ZS53YWl0VW50aWwoY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oYz0+Yy5hZGRBbGwoWyIuLyJdKSkudGhlbigoKT0+c2VsZi5za2lwV2FpdGluZygpKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJhY3RpdmF0ZSIsZT0+e2Uud2FpdFVudGlsKGNsaWVudHMuY2xhaW0oKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsZT0+e2UucmVzcG9uZFdpdGgoY2FjaGVzLm1hdGNoKGUucmVxdWVzdCkudGhlbihyPT5yfHxmZXRjaChlLnJlcXVlc3QpLmNhdGNoKCgpPT5jYWNoZXMubWF0Y2goIi4vIikpKSk7fSk7");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
+if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9ImJ0Yi12OSI7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJpbnN0YWxsIixlPT57ZS53YWl0VW50aWwoY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oYz0+Yy5hZGRBbGwoWyIuLyJdKSkudGhlbigoKT0+c2VsZi5za2lwV2FpdGluZygpKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJhY3RpdmF0ZSIsZT0+e2Uud2FpdFVudGlsKGNsaWVudHMuY2xhaW0oKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsZT0+e2UucmVzcG9uZFdpdGgoY2FjaGVzLm1hdGNoKGUucmVxdWVzdCkudGhlbihyPT5yfHxmZXRjaChlLnJlcXVlc3QpLmNhdGNoKCgpPT5jYWNoZXMubWF0Y2goIi4vIikpKSk7fSk7");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
 let dp=null;
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();dp=e;setTimeout(()=>{const b=document.getElementById("pwa-btn");if(b)b.style.display="block";},2000);});
 function installPWA(){if(dp){dp.prompt();dp.userChoice.then(()=>{dp=null;const b=document.getElementById("pwa-btn");if(b)b.style.display="none";});}else{alert("iPhone: Teile-Symbol tippen, dann Zum Home-Bildschirm");}}
@@ -613,11 +613,13 @@ function App(){
     return archiv.map(function(b){
       var d=b.datum?new Date(b.datum):new Date();
       var kw=Math.ceil(((d-new Date(d.getFullYear(),0,1))/86400000+new Date(d.getFullYear(),0,1).getDay()+1)/7);
+      // Use projekt_name from DB join, fallback to current project
+      var pname=b.projekt_name||(b.projekte&&b.projekte.name)||(aktivProjekt?aktivProjekt.name:'Unbekannt');
       return {...b,
         jahr:String(d.getFullYear()),
         kw:'KW'+String(kw).padStart(2,'0'),
         monat:MONATE_LIST[d.getMonth()],
-        projekt_name:aktivProjekt?aktivProjekt.name:'',
+        projekt_name:pname,
       };
     });
   },[archiv,aktivProjekt]);
@@ -638,10 +640,10 @@ function App(){
     var g={};
     archivGefiltert.forEach(function(b){
       var key=b.jahr+(archivView==='kw'?' / '+b.kw:' / '+b.monat);
-      if(!g[key])g[key]={label:key,berichte:[]};
-      g[key].berichte.push(b);
+      if(!g[key])g[key]={label:key,entries:[]};
+      g[key].entries.push(b);
     });
-    return Object.values(g).sort((a,b)=>b.label>a.label?1:-1);
+    return Object.values(g).sort(function(a,b){return b.label>a.label?1:-1;});
   },[archivGefiltert,archivView]);
 
   // Voice recording
@@ -722,19 +724,13 @@ function App(){
     setArchivLoad(true);
     try{
       // Load berichte with projekt name joined
-      var data=await sb.select('berichte',token,'order=datum.desc,blatt_nr.desc',
-        'id,blatt_nr,datum,status,ausgefuehrte_arbeiten,fehlende_felder,projekt_id,'+
-        'ak_polier,ak_werkpolier,ak_vorarbeiter,ak_maurer,ak_zimmerer,ak_betonbauer,ak_helfer,ak_maschinenpersonal,ak_azubis,'+
-        'g_raupen,g_raupen_anzahl,g_bagger,g_bagger_anzahl,g_kraene,g_kraene_anzahl,'+
-        'g_kompressor,g_kompressor_anzahl,g_verd_geraete,g_verd_geraete_anzahl,'+
-        'g_lkw,g_lkw_anzahl,g_betonstahl,g_betonstahl_anzahl,g_beton,g_beton_anzahl,'+
-        'temp_7h,temp_12h,temp_16h,niederschlag,luftbewegung,'+
-        'nachunternehmer,sonstiges,besuche_text,polier_name,bauleiter_name,bauherr_name,'+
-        'projekte(name,bau_nr)');
+      // Load all berichte
+      var data=await sb.select('berichte',token,'order=datum.desc,blatt_nr.desc');
       if(Array.isArray(data)){
-        // Flatten projekt name
+        // Enrich with projekt names from projekte list
         var enriched=data.map(function(b){
-          return {...b,projekt_name:b.projekte?b.projekte.name:'Unbekannt'};
+          var proj=projekte.find(function(p){return p.id===b.projekt_id;});
+          return {...b,projekt_name:proj?proj.name:'Unbekannt'};
         });
         setArchiv(enriched);
       }
