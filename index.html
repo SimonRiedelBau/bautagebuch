@@ -34,7 +34,7 @@ button:hover:not(:disabled){filter:brightness(.92)}
 @media(display-mode:standalone){#pwa-btn{display:none!important}}
 </style>
 <script>
-if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9ImJ0Yi12NiI7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJpbnN0YWxsIixlPT57ZS53YWl0VW50aWwoY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oYz0+Yy5hZGRBbGwoWyIuLyJdKSkudGhlbigoKT0+c2VsZi5za2lwV2FpdGluZygpKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJhY3RpdmF0ZSIsZT0+e2Uud2FpdFVudGlsKGNsaWVudHMuY2xhaW0oKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsZT0+e2UucmVzcG9uZFdpdGgoY2FjaGVzLm1hdGNoKGUucmVxdWVzdCkudGhlbihyPT5yfHxmZXRjaChlLnJlcXVlc3QpLmNhdGNoKCgpPT5jYWNoZXMubWF0Y2goIi4vIikpKSk7fSk7");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
+if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9ImJ0Yi12NyI7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJpbnN0YWxsIixlPT57ZS53YWl0VW50aWwoY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oYz0+Yy5hZGRBbGwoWyIuLyJdKSkudGhlbigoKT0+c2VsZi5za2lwV2FpdGluZygpKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJhY3RpdmF0ZSIsZT0+e2Uud2FpdFVudGlsKGNsaWVudHMuY2xhaW0oKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsZT0+e2UucmVzcG9uZFdpdGgoY2FjaGVzLm1hdGNoKGUucmVxdWVzdCkudGhlbihyPT5yfHxmZXRjaChlLnJlcXVlc3QpLmNhdGNoKCgpPT5jYWNoZXMubWF0Y2goIi4vIikpKSk7fSk7");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
 let dp=null;
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();dp=e;setTimeout(()=>{const b=document.getElementById("pwa-btn");if(b)b.style.display="block";},2000);});
 function installPWA(){if(dp){dp.prompt();dp.userChoice.then(()=>{dp=null;const b=document.getElementById("pwa-btn");if(b)b.style.display="none";});}else{alert("iPhone: Teile-Symbol tippen, dann Zum Home-Bildschirm");}}
@@ -64,7 +64,40 @@ const sb={
     const r=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{
       method:'POST',headers:sb._h(null),body:JSON.stringify({email,password:pw})
     });
-    return r.json();
+    const d=await r.json();
+    // Store refresh token
+    if(d.refresh_token)localStorage.setItem('sb_refresh',d.refresh_token);
+    return d;
+  },
+  async refresh(){
+    const rt=localStorage.getItem('sb_refresh');
+    if(!rt)return null;
+    try{
+      const r=await fetch(SB_URL+'/auth/v1/token?grant_type=refresh_token',{
+        method:'POST',headers:sb._h(null),body:JSON.stringify({refresh_token:rt})
+      });
+      const d=await r.json();
+      if(d.access_token){
+        localStorage.setItem('sb_token',d.access_token);
+        if(d.refresh_token)localStorage.setItem('sb_refresh',d.refresh_token);
+        return d.access_token;
+      }
+    }catch(e){console.error('Refresh failed:',e);}
+    return null;
+  },
+  async safeRequest(fn){
+    try{return await fn();}
+    catch(e){
+      if(e.message&&(e.message.includes('JWT')||e.message.includes('expired')||e.message.includes('Invalid'))){
+        console.log('Token expired, refreshing...');
+        const newToken=await sb.refresh();
+        if(newToken){
+          // Update token in localStorage
+          return await fn(newToken);
+        }
+      }
+      throw e;
+    }
   },
   async signUp(email,pw,name){
     const r=await fetch(SB_URL+'/auth/v1/signup',{
@@ -77,31 +110,40 @@ const sb={
     await fetch(SB_URL+'/auth/v1/logout',{method:'POST',headers:sb._h(token)});
   },
   async select(table,token,filter='',cols='*'){
-    const url=SB_URL+'/rest/v1/'+table+'?select='+cols+(filter?'&'+filter:'');
-    const r=await fetch(url,{headers:{...sb._h(token),'Prefer':'return=representation'}});
-    const d=await r.json();
-    if(d&&d.message)throw new Error(d.message);
-    return Array.isArray(d)?d:[];
+    const doReq=async(tok)=>{
+      const url=SB_URL+'/rest/v1/'+table+'?select='+cols+(filter?'&'+filter:'');
+      const r=await fetch(url,{headers:{...sb._h(tok||token),'Prefer':'return=representation'}});
+      const d=await r.json();
+      if(d&&d.message)throw new Error(d.message);
+      return Array.isArray(d)?d:[];
+    };
+    return sb.safeRequest(doReq);
   },
   async insert(table,token,data){
-    const r=await fetch(SB_URL+'/rest/v1/'+table,{
-      method:'POST',
-      headers:{...sb._h(token),'Prefer':'return=representation'},
-      body:JSON.stringify(data)
-    });
-    const d=await r.json();
-    if(d&&d.message)throw new Error(d.message);
-    return Array.isArray(d)?d[0]:d;
+    const doReq=async(tok)=>{
+      const r=await fetch(SB_URL+'/rest/v1/'+table,{
+        method:'POST',
+        headers:{...sb._h(tok||token),'Prefer':'return=representation'},
+        body:JSON.stringify(data)
+      });
+      const d=await r.json();
+      if(d&&d.message)throw new Error(d.message);
+      return Array.isArray(d)?d[0]:d;
+    };
+    return sb.safeRequest(doReq);
   },
   async update(table,token,data,filter){
-    const r=await fetch(SB_URL+'/rest/v1/'+table+'?'+filter,{
-      method:'PATCH',
-      headers:{...sb._h(token),'Prefer':'return=representation'},
-      body:JSON.stringify(data)
-    });
-    const d=await r.json();
-    if(d&&d.message)throw new Error(d.message);
-    return Array.isArray(d)?d[0]:d;
+    const doReq=async(tok)=>{
+      const r=await fetch(SB_URL+'/rest/v1/'+table+'?'+filter,{
+        method:'PATCH',
+        headers:{...sb._h(tok||token),'Prefer':'return=representation'},
+        body:JSON.stringify(data)
+      });
+      const d=await r.json();
+      if(d&&d.message)throw new Error(d.message);
+      return Array.isArray(d)?d[0]:d;
+    };
+    return sb.safeRequest(doReq);
   },
   async rpc(fn,token,params){
     const r=await fetch(SB_URL+'/rest/v1/rpc/'+fn,{
@@ -622,6 +664,20 @@ function App(){
     localStorage.removeItem('sb_token');localStorage.removeItem('sb_user');
     setToken(null);setUser(null);setProfil(null);
   }
+
+  // Auto-refresh token on startup
+  useEffect(function(){
+    if(!token)return;
+    // Try to refresh token proactively
+    sb.refresh().then(function(newTok){
+      if(newTok){setToken(newTok);console.log('Token refreshed');}
+    }).catch(function(){});
+    // Also set up periodic refresh every 50 minutes
+    var interval=setInterval(function(){
+      sb.refresh().then(function(newTok){if(newTok)setToken(newTok);}).catch(function(){});
+    },50*60*1000);
+    return function(){clearInterval(interval);};
+  },[]);
 
   // Load profile - non-blocking
   useEffect(function(){
