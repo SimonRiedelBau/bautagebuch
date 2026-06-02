@@ -34,7 +34,7 @@ button:hover:not(:disabled){filter:brightness(.92)}
 @media(display-mode:standalone){#pwa-btn{display:none!important}}
 </style>
 <script>
-if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9ImJ0Yi12NyI7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJpbnN0YWxsIixlPT57ZS53YWl0VW50aWwoY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oYz0+Yy5hZGRBbGwoWyIuLyJdKSkudGhlbigoKT0+c2VsZi5za2lwV2FpdGluZygpKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJhY3RpdmF0ZSIsZT0+e2Uud2FpdFVudGlsKGNsaWVudHMuY2xhaW0oKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsZT0+e2UucmVzcG9uZFdpdGgoY2FjaGVzLm1hdGNoKGUucmVxdWVzdCkudGhlbihyPT5yfHxmZXRjaChlLnJlcXVlc3QpLmNhdGNoKCgpPT5jYWNoZXMubWF0Y2goIi4vIikpKSk7fSk7");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
+if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9ImJ0Yi12OCI7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJpbnN0YWxsIixlPT57ZS53YWl0VW50aWwoY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oYz0+Yy5hZGRBbGwoWyIuLyJdKSkudGhlbigoKT0+c2VsZi5za2lwV2FpdGluZygpKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJhY3RpdmF0ZSIsZT0+e2Uud2FpdFVudGlsKGNsaWVudHMuY2xhaW0oKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsZT0+e2UucmVzcG9uZFdpdGgoY2FjaGVzLm1hdGNoKGUucmVxdWVzdCkudGhlbihyPT5yfHxmZXRjaChlLnJlcXVlc3QpLmNhdGNoKCgpPT5jYWNoZXMubWF0Y2goIi4vIikpKSk7fSk7");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
 let dp=null;
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();dp=e;setTimeout(()=>{const b=document.getElementById("pwa-btn");if(b)b.style.display="block";},2000);});
 function installPWA(){if(dp){dp.prompt();dp.userChoice.then(()=>{dp=null;const b=document.getElementById("pwa-btn");if(b)b.style.display="none";});}else{alert("iPhone: Teile-Symbol tippen, dann Zum Home-Bildschirm");}}
@@ -903,15 +903,21 @@ function App(){
       var payload={name:name,status:'aktiv'};
       if(bauNr)payload.bau_nr=bauNr;
       if(ort)payload.ort=ort;
-      var data=await sb.insert('projekte',token,payload);
+      await sb.insert('projekte',token,payload);
       // Reload projects and set the new one active
       var t=await sb.select('projekte',token,'order=erstellt_am.desc');
       if(Array.isArray(t)){
         setProjekte(t);
-        // Find the newly created project
-        var neu=t.find(function(p){return p.name===name;});
-        if(neu){setAktivProjekt(neu);ladeBlattNr(neu.id);}
-        else if(t.length>0){setAktivProjekt(t[0]);ladeBlattNr(t[0].id);}
+        var neu=t.find(function(p){return p.name===name;})||t[0];
+        if(neu){
+          setAktivProjekt(neu);
+          // Load blatt nr inline (no external function needed)
+          try{
+            var bl=await sb.select('berichte',token,'projekt_id=eq.'+neu.id+'&order=blatt_nr.desc&limit=1','blatt_nr');
+            setBlattNr(Array.isArray(bl)&&bl[0]?bl[0].blatt_nr+1:1);
+          }catch{setBlattNr(1);}
+          setTab('setup');
+        }
       }
     }catch(e){console.error('Projekt erstellen:',e);alert('Fehler beim Erstellen: '+e.message);}
   }
@@ -993,7 +999,6 @@ function App(){
       <button onClick={async function(){
         var name='Neues Projekt '+(projekte.length+1);
         await projektErstellen(name,'','');
-        setTab('setup');
       }} style={{padding:'5px 14px',fontSize:12,border:'1px dashed #444',borderRadius:4,
         cursor:'pointer',background:'transparent',color:'#888',marginLeft:4,
         whiteSpace:'nowrap',fontFamily:'inherit'}}>
