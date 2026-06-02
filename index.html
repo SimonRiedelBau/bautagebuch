@@ -34,7 +34,7 @@ button:hover:not(:disabled){filter:brightness(.92)}
 @media(display-mode:standalone){#pwa-btn{display:none!important}}
 </style>
 <script>
-if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9ImJ0Yi12OSI7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJpbnN0YWxsIixlPT57ZS53YWl0VW50aWwoY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oYz0+Yy5hZGRBbGwoWyIuLyJdKSkudGhlbigoKT0+c2VsZi5za2lwV2FpdGluZygpKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJhY3RpdmF0ZSIsZT0+e2Uud2FpdFVudGlsKGNsaWVudHMuY2xhaW0oKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsZT0+e2UucmVzcG9uZFdpdGgoY2FjaGVzLm1hdGNoKGUucmVxdWVzdCkudGhlbihyPT5yfHxmZXRjaChlLnJlcXVlc3QpLmNhdGNoKCgpPT5jYWNoZXMubWF0Y2goIi4vIikpKSk7fSk7");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
+if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9ImJ0Yi12MTAiO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiaW5zdGFsbCIsZT0+e2Uud2FpdFVudGlsKGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGM9PmMuYWRkQWxsKFsiLi8iXSkpLnRoZW4oKCk9PnNlbGYuc2tpcFdhaXRpbmcoKSkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiYWN0aXZhdGUiLGU9PntlLndhaXRVbnRpbChjbGllbnRzLmNsYWltKCkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiZmV0Y2giLGU9PntlLnJlc3BvbmRXaXRoKGNhY2hlcy5tYXRjaChlLnJlcXVlc3QpLnRoZW4ocj0+cnx8ZmV0Y2goZS5yZXF1ZXN0KS5jYXRjaCgoKT0+Y2FjaGVzLm1hdGNoKCIuLyIpKSkpO30pOw==");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
 let dp=null;
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();dp=e;setTimeout(()=>{const b=document.getElementById("pwa-btn");if(b)b.style.display="block";},2000);});
 function installPWA(){if(dp){dp.prompt();dp.userChoice.then(()=>{dp=null;const b=document.getElementById("pwa-btn");if(b)b.style.display="none";});}else{alert("iPhone: Teile-Symbol tippen, dann Zum Home-Bildschirm");}}
@@ -1071,7 +1071,7 @@ function App(){
       {fehlend.length>0&&!zeigFehlend&&(
         <div style={{background:'#FFF8F0',border:'1px solid #f0ddb0',borderRadius:8,padding:'10px 14px',marginTop:8,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
           <span style={{fontSize:12,color:'#8B6914'}}>Fehlend: {fehlend.join(', ')}</span>
-          <button onClick={function(){setZeigFehlend(true);}} style={{...C.btn('#E6820A'),fontSize:11,padding:'4px 10px'}}>Erganzen</button>
+          <button onClick={function(){setZeigFehlend(true);}} style={{...C.btn('#E6820A'),fontSize:11,padding:'4px 10px'}}>Ergaenzen</button>
         </div>
       )}
     </div>
