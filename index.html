@@ -34,7 +34,7 @@ button:hover:not(:disabled){filter:brightness(.92)}
 @media(display-mode:standalone){#pwa-btn{display:none!important}}
 </style>
 <script>
-if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9ImJ0Yi12MTMiO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiaW5zdGFsbCIsZT0+e2Uud2FpdFVudGlsKGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGM9PmMuYWRkQWxsKFsiLi8iXSkpLnRoZW4oKCk9PnNlbGYuc2tpcFdhaXRpbmcoKSkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiYWN0aXZhdGUiLGU9PntlLndhaXRVbnRpbChjbGllbnRzLmNsYWltKCkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiZmV0Y2giLGU9PntlLnJlc3BvbmRXaXRoKGNhY2hlcy5tYXRjaChlLnJlcXVlc3QpLnRoZW4ocj0+cnx8ZmV0Y2goZS5yZXF1ZXN0KS5jYXRjaCgoKT0+Y2FjaGVzLm1hdGNoKCIuLyIpKSkpO30pOyA=");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
+if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9ImJ0Yi12MTQiO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiaW5zdGFsbCIsZT0+e2Uud2FpdFVudGlsKGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGM9PmMuYWRkQWxsKFsiLi8iXSkpLnRoZW4oKCk9PnNlbGYuc2tpcFdhaXRpbmcoKSkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiYWN0aXZhdGUiLGU9PntlLndhaXRVbnRpbChjbGllbnRzLmNsYWltKCkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiZmV0Y2giLGU9PntlLnJlc3BvbmRXaXRoKGNhY2hlcy5tYXRjaChlLnJlcXVlc3QpLnRoZW4ocj0+cnx8ZmV0Y2goZS5yZXF1ZXN0KS5jYXRjaCgoKT0+Y2FjaGVzLm1hdGNoKCIuLyIpKSkpO30pOw==");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
 let dp=null;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;setTimeout(()=>{const b=document.getElementById('pwa-btn');if(b)b.style.display='block';},2000);});
 function installPWA(){if(dp){dp.prompt();dp.userChoice.then(()=>{dp=null;const b=document.getElementById('pwa-btn');if(b)b.style.display='none';});}else{alert('iPhone: Teile-Symbol tippen, dann Zum Home-Bildschirm');}}
@@ -616,45 +616,6 @@ function ProjektEinstellungen({projekt,token,onUpdate}){
   </div>);
 }
 
-
-// ── Bericht Bearbeiten + Loeschen ────────────────────────────────
-function berichtBearbeiten(b){
-  // Convert DB row back to form object and switch to form tab
-  var f={
-    datum:b.datum?new Date(b.datum).toLocaleDateString('de-DE'):'',
-    arbeitszeit:b.arbeitszeit||'07:00 - 16:00 Uhr',
-    temp7:b.temp_7h||'',temp12:b.temp_12h||'',temp16:b.temp_16h||'',
-    tempMax:b.temp_max||'',tempMin:b.temp_min||'',
-    niederschlag:b.niederschlag||'',luftbewegung:b.luftbewegung||'',
-    arbeitskraefte:{polier:b.ak_polier||'',werkpolier:b.ak_werkpolier||'',vorarbeiter:b.ak_vorarbeiter||'',
-      maurer:b.ak_maurer||'',zimmerer:b.ak_zimmerer||'',betonbauer:b.ak_betonbauer||'',
-      helfer:b.ak_helfer||'',maschinenpersonal:b.ak_maschinenpersonal||'',azubis:b.ak_azubis||''},
-    geraete:{raupen:b.g_raupen_anzahl||0,bagger:b.g_bagger_anzahl||0,kraene:b.g_kraene_anzahl||0,
-      kompressor:b.g_kompressor_anzahl||0,verdGeraete:b.g_verd_geraete_anzahl||0,
-      lkw:b.g_lkw_anzahl||0,betonstahl:b.g_betonstahl_anzahl||0,beton:b.g_beton_anzahl||0},
-    besuche:{polier:b.polier_name||'',bauleiter:b.bauleiter_name||'',bauherr:b.bauherr_name||''},
-    besucheText:b.besuche_text||'',nachunternehmer:b.nachunternehmer||'',
-    ausgefuehrteArbeiten:b.ausgefuehrte_arbeiten||'',sonstiges:b.sonstiges||'',
-    anhangText:b.anhang_text||'',
-    medien:b.medien_json?JSON.parse(b.medien_json):[]
-  };
-  // Store the bericht id for update (not insert)
-  setBericht_edit_id(b.id);
-  setBlattNr(b.blatt_nr);
-  setForm(f);
-  setTab('form');
-  setMsgs(function(m){return m.concat([{role:'assistant',content:'Bericht Blatt '+b.blatt_nr+' geladen. Aenderungen vornehmen und dann Bestaetigen klicken.'}]);});
-}
-
-async function berichtLoeschen(id,blattNr){
-  if(!window.confirm('Bericht Blatt '+blattNr+' wirklich loeschen? Diese Aktion kann nicht rueckgaengig gemacht werden.'))return;
-  try{
-    await sbDeleteBericht(token,id);
-    ladeArchiv();
-    setMsgs(function(m){return m.concat([{role:'assistant',content:'Bericht Blatt '+blattNr+' wurde geloescht.'}]);});
-  }catch(e){alert('Fehler beim Loeschen: '+e.message);}
-}
-
 // ── ZIP + PDF Download ────────────────────────────────────────────
 async function dlZip(entries, label){
   var zip=new JSZip();
@@ -964,6 +925,51 @@ function App(){
   },[input,form,aiLoad,aktivProjekt]);
 
   // Export + Save to Supabase
+
+  // ── Bericht Bearbeiten ─────────────────────────────────────────
+  function berichtBearbeiten(b){
+    var f={
+      datum:b.datum?new Date(b.datum).toLocaleDateString('de-DE'):'',
+      arbeitszeit:b.arbeitszeit||'07:00 - 16:00 Uhr',
+      temp7:b.temp_7h||'',temp12:b.temp_12h||'',temp16:b.temp_16h||'',
+      tempMax:b.temp_max||'',tempMin:b.temp_min||'',
+      niederschlag:b.niederschlag||'',luftbewegung:b.luftbewegung||'',
+      arbeitskraefte:{polier:b.ak_polier||'',werkpolier:b.ak_werkpolier||'',
+        vorarbeiter:b.ak_vorarbeiter||'',maurer:b.ak_maurer||'',
+        zimmerer:b.ak_zimmerer||'',betonbauer:b.ak_betonbauer||'',
+        helfer:b.ak_helfer||'',maschinenpersonal:b.ak_maschinenpersonal||'',azubis:b.ak_azubis||''},
+      geraete:{raupen:b.g_raupen_anzahl||0,bagger:b.g_bagger_anzahl||0,
+        kraene:b.g_kraene_anzahl||0,kompressor:b.g_kompressor_anzahl||0,
+        verdGeraete:b.g_verd_geraete_anzahl||0,lkw:b.g_lkw_anzahl||0,
+        betonstahl:b.g_betonstahl_anzahl||0,beton:b.g_beton_anzahl||0},
+      besuche:{polier:b.polier_name||'',bauleiter:b.bauleiter_name||'',bauherr:b.bauherr_name||''},
+      besucheText:b.besuche_text||'',nachunternehmer:b.nachunternehmer||'',
+      ausgefuehrteArbeiten:b.ausgefuehrte_arbeiten||'',sonstiges:b.sonstiges||'',
+      anhangText:b.anhang_text||'',
+      medien:b.medien_json?JSON.parse(b.medien_json):[]
+    };
+    setBericht_edit_id(b.id);
+    setBlattNr(b.blatt_nr);
+    setForm(f);
+    setTab('form');
+    // Scroll to top of page
+    window.scrollTo(0,0);
+    setMsgs(function(m){return m.concat([{role:'assistant',content:'Bericht Blatt '+b.blatt_nr+' geladen. Zum Formular-Tab wechseln und Aenderungen speichern.'}]);});
+  }
+
+  async function berichtLoeschen(id,blattNrDel){
+    if(!window.confirm('Bericht Blatt '+blattNrDel+' wirklich loeschen?'))return;
+    try{
+      // Refresh token before delete to avoid JWT errors
+      var aktToken=token;
+      try{var refreshed=await sb.refresh();if(refreshed)aktToken=refreshed;}catch(e2){}
+      await sbDeleteBericht(aktToken,id);
+      ladeArchiv();
+      setMsgs(function(m){return m.concat([{role:'assistant',content:'Bericht Blatt '+blattNrDel+' geloescht.'}]);});
+    }catch(e){alert('Fehler beim Loeschen: '+e.message);}
+  }
+
+
   async function exportBericht(bestaetigen){
     if(!aktivProjekt||!token){alert('Bitte zuerst ein Projekt wählen');return;}
     setSaveStatus('saving');

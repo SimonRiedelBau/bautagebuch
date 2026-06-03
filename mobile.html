@@ -28,7 +28,7 @@ button:active{transform:scale(.97)}
 .dot{width:8px;height:8px;border-radius:50%;background:#CC0000;display:inline-block;animation:pulse 1.2s infinite}
 </style>
 <script>
-if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9Im1vYi12NSI7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJpbnN0YWxsIixlPT57ZS53YWl0VW50aWwoY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oYz0+Yy5hZGRBbGwoWyIuLyJdKSkudGhlbigoKT0+c2VsZi5za2lwV2FpdGluZygpKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJhY3RpdmF0ZSIsZT0+e2Uud2FpdFVudGlsKGNsaWVudHMuY2xhaW0oKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsZT0+e2UucmVzcG9uZFdpdGgoY2FjaGVzLm1hdGNoKGUucmVxdWVzdCkudGhlbihyPT5yfHxmZXRjaChlLnJlcXVlc3QpLmNhdGNoKCgpPT5jYWNoZXMubWF0Y2goIi4vIikpKSk7fSk7IA==");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
+if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9Im1vYi12NiI7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJpbnN0YWxsIixlPT57ZS53YWl0VW50aWwoY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oYz0+Yy5hZGRBbGwoWyIuLyJdKSkudGhlbigoKT0+c2VsZi5za2lwV2FpdGluZygpKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJhY3RpdmF0ZSIsZT0+e2Uud2FpdFVudGlsKGNsaWVudHMuY2xhaW0oKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsZT0+e2UucmVzcG9uZFdpdGgoY2FjaGVzLm1hdGNoKGUucmVxdWVzdCkudGhlbihyPT5yfHxmZXRjaChlLnJlcXVlc3QpLmNhdGNoKCgpPT5jYWNoZXMubWF0Y2goIi4vIikpKSk7fSk7");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
 </script>
 </head>
 <body>
@@ -527,7 +527,9 @@ function App(){
   async function berichtLoeschenM(id,blattNr){
     if(!window.confirm('Bericht Blatt '+blattNr+' wirklich loeschen?'))return;
     try{
-      await sbDeleteBericht(token,id);
+      var aktToken=token;
+      try{var refreshed=await sb.refresh();if(refreshed)aktToken=refreshed;}catch(e2){}
+      await sbDeleteBericht(aktToken,id);
       setMsgs(function(m){return [...m,{role:'assistant',content:'Bericht Blatt '+blattNr+' geloescht.'}];});
     }catch(e){alert('Fehler: '+e.message);}
   }
