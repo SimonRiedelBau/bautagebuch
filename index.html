@@ -34,7 +34,7 @@ button:hover:not(:disabled){filter:brightness(.92)}
 @media(display-mode:standalone){#pwa-btn{display:none!important}}
 </style>
 <script>
-if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9ImJ0Yi12MTQiO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiaW5zdGFsbCIsZT0+e2Uud2FpdFVudGlsKGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGM9PmMuYWRkQWxsKFsiLi8iXSkpLnRoZW4oKCk9PnNlbGYuc2tpcFdhaXRpbmcoKSkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiYWN0aXZhdGUiLGU9PntlLndhaXRVbnRpbChjbGllbnRzLmNsYWltKCkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiZmV0Y2giLGU9PntlLnJlc3BvbmRXaXRoKGNhY2hlcy5tYXRjaChlLnJlcXVlc3QpLnRoZW4ocj0+cnx8ZmV0Y2goZS5yZXF1ZXN0KS5jYXRjaCgoKT0+Y2FjaGVzLm1hdGNoKCIuLyIpKSkpO30pOw==");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
+if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9ImJ0Yi12MTUiO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiaW5zdGFsbCIsZT0+e2Uud2FpdFVudGlsKGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGM9PmMuYWRkQWxsKFsiLi8iXSkpLnRoZW4oKCk9PnNlbGYuc2tpcFdhaXRpbmcoKSkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiYWN0aXZhdGUiLGU9PntlLndhaXRVbnRpbChjbGllbnRzLmNsYWltKCkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiZmV0Y2giLGU9PntlLnJlc3BvbmRXaXRoKGNhY2hlcy5tYXRjaChlLnJlcXVlc3QpLnRoZW4ocj0+cnx8ZmV0Y2goZS5yZXF1ZXN0KS5jYXRjaCgoKT0+Y2FjaGVzLm1hdGNoKCIuLyIpKSkpO30pOw==");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
 let dp=null;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;setTimeout(()=>{const b=document.getElementById('pwa-btn');if(b)b.style.display='block';},2000);});
 function installPWA(){if(dp){dp.prompt();dp.userChoice.then(()=>{dp=null;const b=document.getElementById('pwa-btn');if(b)b.style.display='none';});}else{alert('iPhone: Teile-Symbol tippen, dann Zum Home-Bildschirm');}}
@@ -966,7 +966,15 @@ function App(){
       await sbDeleteBericht(aktToken,id);
       ladeArchiv();
       setMsgs(function(m){return m.concat([{role:'assistant',content:'Bericht Blatt '+blattNrDel+' geloescht.'}]);});
-    }catch(e){alert('Fehler beim Loeschen: '+e.message);}
+    }catch(e){
+      console.error('Delete error:', e);
+      if(e.message&&e.message.toLowerCase().includes('jwt')){
+        alert('Sitzung abgelaufen. Bitte neu anmelden.');
+        logout();
+      } else {
+        alert('Fehler beim Loeschen: '+e.message);
+      }
+    }
   }
 
 
@@ -1226,6 +1234,18 @@ function App(){
     {/* ── FORMULAR ── */}
     {tab==='form'&&(
     <div>
+      {bericht_edit_id&&(
+        <div style={{...C.card,background:'#E8F5E9',border:'2px solid #2E7D32',padding:'10px 16px',marginBottom:10}}>
+          <div style={{display:'flex',alignItems:'center',gap:8}}>
+            <span style={{fontSize:14,color:'#2E7D32',fontWeight:700}}>Bearbeitungsmodus</span>
+            <span style={{fontSize:12,color:'#555'}}>Blatt {blattNr} wird bearbeitet</span>
+            <button onClick={function(){setBericht_edit_id(null);setForm(mkForm());setTab('chat');}}
+              style={{marginLeft:'auto',padding:'4px 10px',background:'#CC0000',color:'#fff',border:'none',borderRadius:5,cursor:'pointer',fontSize:11,fontFamily:'inherit',fontWeight:700}}>
+              Abbrechen
+            </button>
+          </div>
+        </div>
+      )}
       <div style={{...C.card,background:'#FFF8F0',border:'1px solid #f0ddb0',padding:'10px 16px',marginBottom:10}}>
         <span style={{fontSize:13,color:'#8B6914',fontWeight:600}}>
           {aktivProjekt?aktivProjekt.name:'Kein Projekt'} · Blatt {blattNr}

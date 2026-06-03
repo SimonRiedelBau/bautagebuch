@@ -28,7 +28,7 @@ button:active{transform:scale(.97)}
 .dot{width:8px;height:8px;border-radius:50%;background:#CC0000;display:inline-block;animation:pulse 1.2s infinite}
 </style>
 <script>
-if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9Im1vYi12NiI7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJpbnN0YWxsIixlPT57ZS53YWl0VW50aWwoY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oYz0+Yy5hZGRBbGwoWyIuLyJdKSkudGhlbigoKT0+c2VsZi5za2lwV2FpdGluZygpKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJhY3RpdmF0ZSIsZT0+e2Uud2FpdFVudGlsKGNsaWVudHMuY2xhaW0oKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsZT0+e2UucmVzcG9uZFdpdGgoY2FjaGVzLm1hdGNoKGUucmVxdWVzdCkudGhlbihyPT5yfHxmZXRjaChlLnJlcXVlc3QpLmNhdGNoKCgpPT5jYWNoZXMubWF0Y2goIi4vIikpKSk7fSk7");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
+if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9Im1vYi12NyI7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJpbnN0YWxsIixlPT57ZS53YWl0VW50aWwoY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oYz0+Yy5hZGRBbGwoWyIuLyJdKSkudGhlbigoKT0+c2VsZi5za2lwV2FpdGluZygpKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJhY3RpdmF0ZSIsZT0+e2Uud2FpdFVudGlsKGNsaWVudHMuY2xhaW0oKSk7fSk7c2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsZT0+e2UucmVzcG9uZFdpdGgoY2FjaGVzLm1hdGNoKGUucmVxdWVzdCkudGhlbihyPT5yfHxmZXRjaChlLnJlcXVlc3QpLmNhdGNoKCgpPT5jYWNoZXMubWF0Y2goIi4vIikpKSk7fSk7");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
 </script>
 </head>
 <body>
@@ -395,6 +395,18 @@ function App(){
       </div>
       {/* Section Content */}
       <div style={{flex:1,overflowY:'auto',padding:'16px'}}>
+        {berichtEditId&&(
+          <div style={{background:'#E8F5E9',border:'2px solid #2E7D32',borderRadius:10,padding:'10px 14px',marginBottom:10}}>
+            <div style={{display:'flex',alignItems:'center',gap:8}}>
+              <span style={{fontSize:13,color:'#2E7D32',fontWeight:700}}>Bearbeitungsmodus</span>
+              <span style={{fontSize:11,color:'#555'}}>Blatt {blattNr}</span>
+              <button onClick={function(){setBerichtEditId(null);setForm(mkForm());setTab('home');}}
+                style={{marginLeft:'auto',padding:'5px 10px',background:'#CC0000',color:'#fff',border:'none',borderRadius:6,cursor:'pointer',fontSize:11,fontFamily:'inherit',fontWeight:700}}>
+                Abbrechen
+              </button>
+            </div>
+          </div>
+        )}
         {section==='wetter'&&<div>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
             {[['temp7','7h'],['temp12','12h'],['temp16','16h'],['tempMax','Max'],['tempMin','Min']].map(k=>(
@@ -531,7 +543,13 @@ function App(){
       try{var refreshed=await sb.refresh();if(refreshed)aktToken=refreshed;}catch(e2){}
       await sbDeleteBericht(aktToken,id);
       setMsgs(function(m){return [...m,{role:'assistant',content:'Bericht Blatt '+blattNr+' geloescht.'}];});
-    }catch(e){alert('Fehler: '+e.message);}
+    }catch(e){
+      if(e.message&&e.message.toLowerCase().includes('jwt')){
+        alert('Sitzung abgelaufen. Bitte neu anmelden.');
+      } else {
+        alert('Fehler beim Loeschen: '+e.message);
+      }
+    }
   }
 
   function ArchivTab(){
