@@ -34,7 +34,7 @@ button:hover:not(:disabled){filter:brightness(.92)}
 @media(display-mode:standalone){#pwa-btn{display:none!important}}
 </style>
 <script>
-if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9ImJ0Yi12MTUiO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiaW5zdGFsbCIsZT0+e2Uud2FpdFVudGlsKGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGM9PmMuYWRkQWxsKFsiLi8iXSkpLnRoZW4oKCk9PnNlbGYuc2tpcFdhaXRpbmcoKSkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiYWN0aXZhdGUiLGU9PntlLndhaXRVbnRpbChjbGllbnRzLmNsYWltKCkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiZmV0Y2giLGU9PntlLnJlc3BvbmRXaXRoKGNhY2hlcy5tYXRjaChlLnJlcXVlc3QpLnRoZW4ocj0+cnx8ZmV0Y2goZS5yZXF1ZXN0KS5jYXRjaCgoKT0+Y2FjaGVzLm1hdGNoKCIuLyIpKSkpO30pOw==");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
+if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9ImJ0Yi12MTciO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiaW5zdGFsbCIsZT0+e2Uud2FpdFVudGlsKGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGM9PmMuYWRkQWxsKFsiLi8iXSkpLnRoZW4oKCk9PnNlbGYuc2tpcFdhaXRpbmcoKSkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiYWN0aXZhdGUiLGU9PntlLndhaXRVbnRpbChjbGllbnRzLmNsYWltKCkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiZmV0Y2giLGU9PntlLnJlc3BvbmRXaXRoKGNhY2hlcy5tYXRjaChlLnJlcXVlc3QpLnRoZW4ocj0+cnx8ZmV0Y2goZS5yZXF1ZXN0KS5jYXRjaCgoKT0+Y2FjaGVzLm1hdGNoKCIuLyIpKSkpO30pOw==");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
 let dp=null;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;setTimeout(()=>{const b=document.getElementById('pwa-btn');if(b)b.style.display='block';},2000);});
 function installPWA(){if(dp){dp.prompt();dp.userChoice.then(()=>{dp=null;const b=document.getElementById('pwa-btn');if(b)b.style.display='none';});}else{alert('iPhone: Teile-Symbol tippen, dann Zum Home-Bildschirm');}}
@@ -45,6 +45,7 @@ function installPWA(){if(dp){dp.prompt();dp.userChoice.then(()=>{dp=null;const b
 <button id="pwa-btn" onclick="installPWA()">Als App installieren</button>
 <script>const LOGO_PNG="data:image/png;base64,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";</script>
 <script type="text/babel">
+
 const {useState,useEffect,useRef,useCallback,useMemo}=React;
 
 // ── Supabase Config ──────────────────────────────────────────────
@@ -401,12 +402,83 @@ function buildPDFDoc(form,projektName,bauNr,blattNr){
 }
 
 // ── AI ────────────────────────────────────────────────────────────
-async function callClaude(msgs){
-  const r=await fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,messages:msgs})
+// ── Lokaler NLP Parser (Fallback ohne API) ───────────────────────
+function parseLokal(text, form){
+  var t=text.toLowerCase();
+  var updates={};
+  var antwort='';
+  // Zahlen für Arbeitskräfte
+  var akMap={
+    'polier':['polier','poliere'],
+    'maurer':['maurer','mauerer'],
+    'zimmerer':['zimmerer'],
+    'betonbauer':['betonbauer','beton'],
+    'helfer':['helfer'],
+    'vorarbeiter':['vorarbeiter'],
+    'werkpolier':['werkpolier'],
+    'maschinenpersonal':['maschinist','maschinenpersonal','baggerfahrer','kranfahrer'],
+    'azubis':['azubi','lehrling','auszubildend']
+  };
+  // Arbeitskräfte erkennen
+  var akUpdates={};
+  Object.entries(akMap).forEach(function(e){
+    var key=e[0], aliases=e[1];
+    aliases.forEach(function(alias){
+      var match=text.match(new RegExp('(\\d+)\\s*'+alias,'i')) ||
+                text.match(new RegExp(alias+'[:\\s]+(\\d+)','i'));
+      if(match){akUpdates[key]=parseInt(match[1]||match[2]);antwort='Arbeitskräfte aktualisiert!';}
+    });
   });
-  const d=await r.json();return d.content&&d.content[0]?d.content[0].text:'';
+  if(Object.keys(akUpdates).length>0)updates.arbeitskraefte=akUpdates;
+  // Geräte erkennen
+  var geraeteMap={
+    'bagger':['bagger'],'kraene':['kran','kräne','kraene'],
+    'raupen':['raupe'],'kompressor':['kompressor'],
+    'verdGeraete':['rüttel','verdicht'],'lkw':['lkw','lastwagen'],
+    'betonstahl':['betonstahl'],'beton':['betonpumpe','betonmischer']
+  };
+  var gUpdates={};
+  Object.entries(geraeteMap).forEach(function(e){
+    var key=e[0], aliases=e[1];
+    aliases.forEach(function(alias){
+      if(t.includes(alias)){
+        var m=text.match(new RegExp('(\\d+)\\s*'+alias,'i'));
+        gUpdates[key]=m?parseInt(m[1]):1;
+      }
+    });
+  });
+  if(Object.keys(gUpdates).length>0)updates.geraete=gUpdates;
+  // Wetter erkennen
+  if(t.match(/\d+\s*(grad|°c|°)/)){
+    var temps=text.match(/(\d+)\s*(grad|°[cC]?)/g);
+    if(temps&&temps.length>=1)updates.temp7=temps[0].replace(/grad/i,'').trim()+'°C';
+    if(temps&&temps.length>=2)updates.tempMax=temps[1].replace(/grad/i,'').trim()+'°C';
+  }
+  if(t.includes('regen'))updates.niederschlag='Regenschauer';
+  if(t.includes('schnee'))updates.niederschlag='Schneefall';
+  if(t.includes('windstill')||t.includes('still'))updates.luftbewegung='still';
+  if(t.includes('wind'))updates.luftbewegung='mäßiger Wind';
+  if(t.includes('sturm'))updates.luftbewegung='starker Wind';
+  // Ausgeführte Arbeiten - immer erfassen wenn nichts anderes erkannt
+  if(!antwort||(Object.keys(updates).length===0)){
+    var neu=(form.ausgefuehrteArbeiten?form.ausgefuehrteArbeiten+'\n':'')+text;
+    updates.ausgefuehrteArbeiten=neu;
+    if(!antwort)antwort='Notiert in Ausgeführte Arbeiten!';
+  }
+  return {antwort:antwort||'Verstanden!', updates:updates};
+}
+
+async function callClaude(msgs){
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,messages:msgs})
+    });
+    const d=await r.json();
+    if(d&&d.error){return null;} // Signal für lokalen Fallback
+    return d.content&&d.content[0]?d.content[0].text:null;
+  }catch(e){return null;} // Netzwerkfehler → lokaler Fallback
 }
 
 // ── Login Screen ──────────────────────────────────────────────────
@@ -783,12 +855,24 @@ function App(){
   async function ladeProjekte(){
     if(!token)return;
     try{
-      var data=await sb.select('projekte',token,'order=erstellt_am.desc');
+      // Nur aktive Projekte (nicht archivierte)
+      var data=await sb.select('projekte',token,'status=neq.archiviert&order=erstellt_am.desc');
       if(Array.isArray(data)){
         setProjekte(data);
-        if(data.length>0&&!aktivProjekt)setAktivProjekt(data[0]);
+        if(data.length>0&&!aktivProjekt){setAktivProjekt(data[0]);ladeBlattNr(data[0].id);}
       }
-    }catch(e){console.error('Projekte laden:',e);}
+    }catch(e){
+      // Fallback ohne Status-Filter
+      try{
+        var data2=await sb.select('projekte',token,'order=erstellt_am.desc');
+        if(Array.isArray(data2)){setProjekte(data2);if(data2.length>0&&!aktivProjekt)setAktivProjekt(data2[0]);}
+      }catch(e2){console.error('Projekte laden:',e2);}
+    }
+  }
+
+  async function ladeBlattNr(pid){
+    if(!token||!pid)return;
+    try{var d=await sb.select('berichte',token,'projekt_id=eq.'+pid+'&order=blatt_nr.desc&limit=1','blatt_nr');setBlattNr(Array.isArray(d)&&d[0]?d[0].blatt_nr+1:1);}catch{setBlattNr(1);}
   }
 
   // Load next Blatt-Nr when project changes
@@ -848,6 +932,52 @@ function App(){
 
   // Voice recording
   async function startRecording(){
+    // Versuche zuerst Web Speech API (automatische Transkription)
+    if('SpeechRecognition' in window||'webkitSpeechRecognition' in window){
+      var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+      var recognition=new SR();
+      recognition.lang='de-DE';
+      recognition.continuous=false;
+      recognition.interimResults=false;
+      recognition.onstart=function(){setRecording(true);setMsgs(function(m){return m.concat([{role:'assistant',content:'Höre zu... Sprich jetzt!'}]);});};
+      recognition.onresult=function(e){
+        var transkription=e.results[0][0].transcript;
+        var zeit=new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+        // Direkt in Chat senden als ob Nutzer getippt hätte
+        setInput(transkription);
+        setMsgs(function(m){return m.concat([{role:'assistant',content:'Erkannt: "'+transkription+'" – wird verarbeitet...'}]);});
+        // Automatisch senden nach kurzer Verzögerung
+        setTimeout(function(){
+          if(transkription.trim()){
+            setInput('');
+            setMsgs(function(m){return m.concat([{role:'user',content:transkription}]);});
+            // Direkter Übertrag in Ausgeführte Arbeiten + lokaler Parser
+            var parsed=parseLokal(transkription,form);
+            setForm(function(f){
+              var n=Object.assign({},f),u=parsed.updates;
+              if(u.ausgefuehrteArbeiten!=null)n.ausgefuehrteArbeiten=u.ausgefuehrteArbeiten;
+              if(u.arbeitskraefte)n.arbeitskraefte=Object.assign({},f.arbeitskraefte,u.arbeitskraefte);
+              if(u.geraete)n.geraete=Object.assign({},f.geraete,u.geraete);
+              // Auch in medien speichern
+              n.medien=(f.medien||[]).concat([{typ:'sprache',dataUrl:null,beschreibung:'Aufnahme '+zeit,transkription:transkription}]);
+              return n;
+            });
+            setMsgs(function(m){return m.concat([{role:'assistant',content:parsed.antwort+' – Transkription im Anhang gespeichert.'}]);});
+          }
+        },300);
+        setRecording(false);
+      };
+      recognition.onerror=function(e){
+        setRecording(false);
+        if(e.error==='not-allowed')alert('Mikrofon-Zugriff verweigert. Bitte in Browser-Einstellungen erlauben.');
+        else setMsgs(function(m){return m.concat([{role:'assistant',content:'Spracherkennung Fehler: '+e.error+'. Bitte Text tippen.'}]);});
+      };
+      recognition.onend=function(){setRecording(false);};
+      recognition.start();
+      setRecorder(recognition);
+      return;
+    }
+    // Fallback: Manuelle Aufnahme ohne Transkription
     try{
       var stream=await navigator.mediaDevices.getUserMedia({audio:true});
       mediaRef.current=stream;
@@ -856,23 +986,21 @@ function App(){
       mr.ondataavailable=function(e){chunks.push(e.data);};
       mr.onstop=async function(){
         stream.getTracks().forEach(function(t){t.stop();});
-        var blob=new Blob(chunks,{type:'audio/webm'});
-        // Ask user to type what they said - add as audio entry in medien
         var zeit=new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
         setForm(function(f){
-          var newMedien=(f.medien||[]).concat([{typ:'sprache',dataUrl:null,beschreibung:'Aufnahme '+zeit,transkription:''}]);
-          return Object.assign({},f,{medien:newMedien});
+          return Object.assign({},f,{medien:(f.medien||[]).concat([{typ:'sprache',dataUrl:null,beschreibung:'Aufnahme '+zeit,transkription:''}])});
         });
-        setMsgs(function(m){return m.concat([
-          {role:'assistant',content:'Sprachaufnahme gespeichert ('+zeit+'). Tippe die Transkription oder was du gesagt hast - ich ergaenze den Bericht:'}
-        ]);});
+        setMsgs(function(m){return m.concat([{role:'assistant',content:'Aufnahme gespeichert ('+zeit+'). Tippe was du gesagt hast – ich übertrage es ins Formular:'}]);});
       };
       mr.start();
       setRecorder(mr);setRecording(true);
     }catch(e){alert('Mikrofon nicht verfügbar: '+e.message);}
   }
   function stopRecording(){
-    if(recorder){recorder.stop();setRecorder(null);}
+    if(recorder){
+      if(recorder.stop)recorder.stop(); // MediaRecorder oder SpeechRecognition
+      setRecorder(null);
+    }
     setRecording(false);
   }
 
@@ -905,22 +1033,38 @@ function App(){
       '. Antworte NUR als JSON: {"antwort":"Bestaetigung","updates":{"ausgefuehrteArbeiten":"Text","sonstiges":"opt","besucheText":"opt","nachunternehmer":"opt","arbeitskraefte":{},"besuche":{},"geraete":{}}}';
     try{
       var raw=await callClaude([{role:'user',content:sys+'\n\nNachricht: '+um}]);
-      var p;try{p=JSON.parse(raw.replace(/```json|```/g,''));}catch(e){p={antwort:'Notiert!',updates:{ausgefuehrteArbeiten:(form.ausgefuehrteArbeiten?form.ausgefuehrteArbeiten+'\n':'')+um}};}
+      var p;
+      if(raw===null){
+        // Kein API oder Netzwerkfehler → lokaler Parser
+        p=parseLokal(um,form);
+      } else {
+        try{p=JSON.parse(raw.replace(/```json|```/g,''));}
+        catch(e){p=parseLokal(um,form);}
+      }
       if(p.updates){
         setForm(function(f){
           var n=Object.assign({},f),u=p.updates;
           if(u.ausgefuehrteArbeiten!=null)n.ausgefuehrteArbeiten=u.ausgefuehrteArbeiten;
-          if(u.sonstiges)n.sonstiges=u.sonstiges;if(u.besucheText)n.besucheText=u.besucheText;
+          if(u.sonstiges)n.sonstiges=u.sonstiges;
+          if(u.besucheText)n.besucheText=u.besucheText;
           if(u.nachunternehmer)n.nachunternehmer=u.nachunternehmer;
           if(u.arbeitskraefte)n.arbeitskraefte=Object.assign({},f.arbeitskraefte,u.arbeitskraefte);
           if(u.besuche)n.besuche=Object.assign({},f.besuche,u.besuche);
           if(u.geraete)n.geraete=Object.assign({},f.geraete,u.geraete);
+          if(u.niederschlag)n.niederschlag=u.niederschlag;
+          if(u.luftbewegung)n.luftbewegung=u.luftbewegung;
+          if(u.temp7)n.temp7=u.temp7;
+          if(u.tempMax)n.tempMax=u.tempMax;
           return n;
         });
       }
       setMsgs(function(m){return m.concat([{role:'assistant',content:p.antwort||'Verstanden!'}]);});
-      histRef.current.push({role:'assistant',content:p.antwort});
-    }catch(e){setMsgs(function(m){return m.concat([{role:'assistant',content:'Verbindungsfehler.'}]);});}
+      if(histRef&&histRef.current)histRef.current.push({role:'assistant',content:p.antwort});
+    }catch(e){
+      // Letzter Fallback: direkt in Ausgeführte Arbeiten
+      setForm(function(f){return Object.assign({},f,{ausgefuehrteArbeiten:(f.ausgefuehrteArbeiten?f.ausgefuehrteArbeiten+'\n':'')+um});});
+      setMsgs(function(m){return m.concat([{role:'assistant',content:'Notiert in Ausgeführte Arbeiten!'}]);});
+    }
     setAiLoad(false);
   },[input,form,aiLoad,aktivProjekt]);
 
@@ -1047,6 +1191,42 @@ function App(){
   }
 
   // Projekt erstellen
+  async function projektArchivieren(projekt){
+    if(!token||!projekt)return;
+    if(!window.confirm('Projekt "'+projekt.name+'" ausblenden? Es bleibt in der Datenbank gespeichert und kann wiederhergestellt werden.'))return;
+    try{
+      await sb.update('projekte',token,{status:'archiviert'},'id=eq.'+projekt.id);
+      var d=await sb.select('projekte',token,'order=erstellt_am.desc');
+      if(Array.isArray(d)){
+        setProjekte(d.filter(function(p){return p.status!=='archiviert';}));
+        var naechstes=d.filter(function(p){return p.status!=='archiviert'&&p.id!==projekt.id;})[0]||null;
+        setAktivProjekt(naechstes);
+        if(naechstes)ladeBlattNr(naechstes.id);
+      }
+      setMsgs(function(m){return m.concat([{role:'assistant',content:'Projekt "'+projekt.name+'" wurde ausgeblendet.'}]);});
+    }catch(e){alert('Fehler: '+e.message);}
+  }
+
+  async function projektLoeschen(projekt){
+    if(!token||!projekt)return;
+    if(!window.confirm('Projekt "'+projekt.name+'" und ALLE zugehörigen Berichte dauerhaft löschen?\n\nDiese Aktion kann NICHT rückgängig gemacht werden!'))return;
+    if(!window.confirm('Wirklich endgültig löschen? Alle '+projekt.name+' Berichte gehen verloren.'))return;
+    try{
+      // Erst alle Berichte löschen
+      await sb.delete('berichte',token,'projekt_id=eq.'+projekt.id);
+      // Dann Projekt löschen
+      await sb.delete('projekte',token,'id=eq.'+projekt.id);
+      var d=await sb.select('projekte',token,'order=erstellt_am.desc');
+      if(Array.isArray(d)){
+        var aktive=d.filter(function(p){return p.status!=='archiviert';});
+        setProjekte(aktive);
+        setAktivProjekt(aktive[0]||null);
+        if(aktive[0])ladeBlattNr(aktive[0].id);
+      }
+      setMsgs(function(m){return m.concat([{role:'assistant',content:'Projekt "'+projekt.name+'" wurde endgültig gelöscht.'}]);});
+    }catch(e){alert('Fehler beim Löschen: '+e.message);}
+  }
+
   async function projektErstellen(name,bauNr,ort){
     if(!token)return;
     try{
@@ -1503,14 +1683,24 @@ function App(){
       <div style={C.card}><div style={C.sh}>Projekte</div>
         {projekte.length===0&&<div style={{fontSize:13,color:'#888'}}>Noch keine Projekte. Oben anlegen.</div>}
         {projekte.map(function(p){return(
-          <div key={p.id} style={{display:'flex',alignItems:'center',gap:10,padding:'10px 0',borderBottom:'1px solid #f0efed'}}>
-            <div style={{flex:1}}>
+          <div key={p.id} style={{display:'flex',alignItems:'center',gap:8,padding:'10px 0',borderBottom:'1px solid #f0efed',flexWrap:'wrap'}}>
+            <div style={{flex:1,minWidth:120}}>
               <div style={{fontWeight:700,fontSize:13}}>{p.name}</div>
-              <div style={{fontSize:11,color:'#888'}}>{p.bau_nr||'Keine Bau-Nr.'} · {p.status}</div>
+              <div style={{fontSize:11,color:'#888'}}>{p.bau_nr||'Keine Bau-Nr.'} · {p.ort||''}</div>
             </div>
             <button onClick={function(){setAktivProjekt(p);setTab('chat');}}
               style={{...C.btn(aktivProjekt&&aktivProjekt.id===p.id?'#CC0000':'#888'),fontSize:11,padding:'4px 10px'}}>
-              {aktivProjekt&&aktivProjekt.id===p.id?'Aktiv':'Wechseln'}
+              {aktivProjekt&&aktivProjekt.id===p.id?'★ Aktiv':'Wechseln'}
+            </button>
+            <button onClick={function(){projektArchivieren(p);}}
+              title="Projekt ausblenden (wiederherstellbar)"
+              style={{...C.btn('#555'),fontSize:11,padding:'4px 8px'}}>
+              Ausblenden
+            </button>
+            <button onClick={function(){projektLoeschen(p);}}
+              title="Projekt endgültig löschen"
+              style={{...C.btn('#8B1A1A'),fontSize:11,padding:'4px 8px'}}>
+              Löschen
             </button>
           </div>
         );})}
@@ -1577,6 +1767,7 @@ function NeuProjekt({onSave}){
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+
 
 </script>
 </body>
