@@ -34,7 +34,7 @@ button:hover:not(:disabled){filter:brightness(.92)}
 @media(display-mode:standalone){#pwa-btn{display:none!important}}
 </style>
 <script>
-if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9ImJ0Yi12MTkiO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiaW5zdGFsbCIsZT0+e2Uud2FpdFVudGlsKGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGM9PmMuYWRkQWxsKFsiLi8iXSkpLnRoZW4oKCk9PnNlbGYuc2tpcFdhaXRpbmcoKSkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiYWN0aXZhdGUiLGU9PntlLndhaXRVbnRpbChjbGllbnRzLmNsYWltKCkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiZmV0Y2giLGU9PntlLnJlc3BvbmRXaXRoKGNhY2hlcy5tYXRjaChlLnJlcXVlc3QpLnRoZW4ocj0+cnx8ZmV0Y2goZS5yZXF1ZXN0KS5jYXRjaCgoKT0+Y2FjaGVzLm1hdGNoKCIuLyIpKSkpO30pOw==");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
+if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9ImJ0Yi12MjAiO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiaW5zdGFsbCIsZT0+e2Uud2FpdFVudGlsKGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGM9PmMuYWRkQWxsKFsiLi8iXSkpLnRoZW4oKCk9PnNlbGYuc2tpcFdhaXRpbmcoKSkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiYWN0aXZhdGUiLGU9PntlLndhaXRVbnRpbChjbGllbnRzLmNsYWltKCkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiZmV0Y2giLGU9PntlLnJlc3BvbmRXaXRoKGNhY2hlcy5tYXRjaChlLnJlcXVlc3QpLnRoZW4ocj0+cnx8ZmV0Y2goZS5yZXF1ZXN0KS5jYXRjaCgoKT0+Y2FjaGVzLm1hdGNoKCIuLyIpKSkpO30pOw==");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
 let dp=null;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;setTimeout(()=>{const b=document.getElementById('pwa-btn');if(b)b.style.display='block';},2000);});
 function installPWA(){if(dp){dp.prompt();dp.userChoice.then(()=>{dp=null;const b=document.getElementById('pwa-btn');if(b)b.style.display='none';});}else{alert('iPhone: Teile-Symbol tippen, dann Zum Home-Bildschirm');}}
@@ -78,7 +78,7 @@ const sb={
   _h:(token)=>({
     'Content-Type':'application/json',
     'apikey':SB_KEY,
-    'Authorization':'Bearer '+(token||SB_KEY)
+    'Authorization':'Bearer '+(token||localStorage.getItem('sb_token')||SB_KEY)
   }),
   async signIn(email,pw){
     const r=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{
@@ -106,14 +106,18 @@ const sb={
     return null;
   },
   async safeRequest(fn){
-    try{return await fn();}
-    catch(e){
-      if(e.message&&(e.message.includes('JWT')||e.message.includes('expired')||e.message.includes('Invalid'))){
-        console.log('Token expired, refreshing...');
-        const newToken=await sb.refresh();
-        if(newToken){
-          // Update token in localStorage
-          return await fn(newToken);
+    // Always read freshest token from localStorage
+    const tok=localStorage.getItem('sb_token')||'';
+    try{
+      return await fn(tok);
+    }catch(e){
+      if(e.message&&(e.message.includes('JWT')||e.message.includes('expired')||e.message.includes('token')||e.message.includes('Invalid'))){
+        console.log('Token expired, auto-refreshing...');
+        const newTok=await sb.refresh();
+        if(newTok){
+          return await fn(newTok);
+        } else {
+          throw new Error('Sitzung abgelaufen. Bitte neu anmelden.');
         }
       }
       throw e;
@@ -1124,6 +1128,8 @@ function App(){
 
   async function exportBericht(bestaetigen){
     if(!aktivProjekt||!token){alert('Bitte zuerst ein Projekt wählen');return;}
+    // Token refresh vor dem Speichern
+    try{const t=await sb.refresh();if(t&&t!==token)setToken(t);}catch(e){}
     setSaveStatus('saving');
     
     // Fehlende Felder prüfen
@@ -1193,6 +1199,7 @@ function App(){
   // Projekt erstellen
   async function projektArchivieren(projekt){
     if(!token||!projekt)return;
+    try{const t=await sb.refresh();if(t&&t!==token)setToken(t);}catch(e){}
     if(!window.confirm('Projekt "'+projekt.name+'" ausblenden? Es bleibt in der Datenbank gespeichert und kann wiederhergestellt werden.'))return;
     try{
       await sb.update('projekte',token,{status:'archiviert'},'id=eq.'+projekt.id);
@@ -1230,6 +1237,8 @@ function App(){
   async function projektErstellen(name,bauNr,ort){
     if(!token)return;
     try{
+      // Refresh token before creating project
+      try{const t=await sb.refresh();if(t&&t!==token)setToken(t);}catch(e){}
       var payload={name:name,status:'aktiv'};
       if(bauNr)payload.bau_nr=bauNr;
       if(ort)payload.ort=ort;
