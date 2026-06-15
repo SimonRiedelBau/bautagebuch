@@ -34,7 +34,7 @@ button:hover:not(:disabled){filter:brightness(.92)}
 @media(display-mode:standalone){#pwa-btn{display:none!important}}
 </style>
 <script>
-if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9ImJ0Yi12MTciO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiaW5zdGFsbCIsZT0+e2Uud2FpdFVudGlsKGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGM9PmMuYWRkQWxsKFsiLi8iXSkpLnRoZW4oKCk9PnNlbGYuc2tpcFdhaXRpbmcoKSkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiYWN0aXZhdGUiLGU9PntlLndhaXRVbnRpbChjbGllbnRzLmNsYWltKCkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiZmV0Y2giLGU9PntlLnJlc3BvbmRXaXRoKGNhY2hlcy5tYXRjaChlLnJlcXVlc3QpLnRoZW4ocj0+cnx8ZmV0Y2goZS5yZXF1ZXN0KS5jYXRjaCgoKT0+Y2FjaGVzLm1hdGNoKCIuLyIpKSkpO30pOw==");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
+if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9ImJ0Yi12MTkiO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiaW5zdGFsbCIsZT0+e2Uud2FpdFVudGlsKGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGM9PmMuYWRkQWxsKFsiLi8iXSkpLnRoZW4oKCk9PnNlbGYuc2tpcFdhaXRpbmcoKSkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiYWN0aXZhdGUiLGU9PntlLndhaXRVbnRpbChjbGllbnRzLmNsYWltKCkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiZmV0Y2giLGU9PntlLnJlc3BvbmRXaXRoKGNhY2hlcy5tYXRjaChlLnJlcXVlc3QpLnRoZW4ocj0+cnx8ZmV0Y2goZS5yZXF1ZXN0KS5jYXRjaCgoKT0+Y2FjaGVzLm1hdGNoKCIuLyIpKSkpO30pOw==");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
 let dp=null;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;setTimeout(()=>{const b=document.getElementById('pwa-btn');if(b)b.style.display='block';},2000);});
 function installPWA(){if(dp){dp.prompt();dp.userChoice.then(()=>{dp=null;const b=document.getElementById('pwa-btn');if(b)b.style.display='none';});}else{alert('iPhone: Teile-Symbol tippen, dann Zum Home-Bildschirm');}}
@@ -310,15 +310,15 @@ function buildPDFDoc(form,projektName,bauNr,blattNr){
     var CY=GYY+GT+10;CY+=6;CY=rbar(CY,'Ausgefuehrte Arbeiten:')+2;
     var LH=14.5,tL=wrapText(form.ausgefuehrteArbeiten);
     for(var i3=0;i3<15;i3++){var ly=CY+(i3+1)*LH;doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(56.7,ly,567.3,ly);
-      if(i3<tL.length){doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(0,0,0);doc.text(tL[i3],58.5,ly-2);}}
+      if(i3<tL.length){doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(0,0,0);doc.text(tL[i3],58.5,ly-LH*0.62);}}
     CY+=15*LH+8;CY=rbar(CY,'Sonstiges / Besondere Vorkommnisse:')+2;
     var sL=wrapText(form.sonstiges);
     for(var i4=0;i4<3;i4++){var ly2=CY+(i4+1)*LH;doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(56.8,ly2,567.1,ly2);
-      if(i4<sL.length){doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(0,0,0);doc.text(sL[i4],58.5,ly2-2);}}
+      if(i4<sL.length){doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(0,0,0);doc.text(sL[i4],58.5,ly2-LH*0.62);}}
     CY+=3*LH+8;CY=rbar(CY,'Besuche:')+2;
     var bL=wrapText(form.besucheText);
     for(var i5=0;i5<2;i5++){var ly3=CY+(i5+1)*LH;doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(56.8,ly3,567.1,ly3);
-      if(i5<bL.length){doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(0,0,0);doc.text(bL[i5],58.5,ly3-2);}}
+      if(i5<bL.length){doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(0,0,0);doc.text(bL[i5],58.5,ly3-LH*0.62);}}
     CY+=2*LH+10;hl(CY,56.8,566.8,0.5);CY+=8;
     [[57,'Polier:','polier'],[207,'Bauleiter:','bauleiter'],[358,'Bauherr:','bauherr']].forEach(function(s){
       doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(0,0,0);doc.text(s[1],s[0],CY);
@@ -330,7 +330,7 @@ function buildPDFDoc(form,projektName,bauNr,blattNr){
     var Y=112;Y=rbar(Y,'Ausgefuehrte Arbeiten')+2;
     var LH=14.5,tL=wrapText(form.ausgefuehrteArbeiten);
     for(var i=0;i<22;i++){var ly=Y+(i+1)*LH;doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(56.7,ly,567.3,ly);
-      if(i<tL.length){doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(0,0,0);doc.text(tL[i],58.5,ly-2);}}
+      if(i<tL.length){doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(0,0,0);doc.text(tL[i],58.5,ly-LH*0.62);}}
     var CY=Y+22*LH+8;hl(CY,56.8,566.8,0.5);CY+=8;
     [[57,'Polier'],[207,'Bauleiter'],[358,'Bauherr']].forEach(function(s){
       doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(0,0,0);doc.text(s[1],s[0],CY);hl(CY+10,s[0],s[0]+131,0.5);});
@@ -1339,8 +1339,8 @@ function App(){
 
     {/* Tabs */}
     <div style={{display:'flex',gap:2,background:'#e8e5e0',padding:'6px 20px 0'}}>
-      {[['chat','Chat'],['form','Formular'],['archiv','Archiv'],['setup','Einstellungen']].map(function(t){return(
-        <button key={t[0]} onClick={function(){setTab(t[0]);if(t[0]==='archiv')ladeArchiv();}}
+      {[['chat','Chat'],['form','Formular'],['archiv','Archiv'],['projekte','Projekte'],['setup','Profil']].map(function(t){return(
+        <button key={t[0]} onClick={function(){setTab(t[0]);if(t[0]==='archiv')ladeArchiv();if(t[0]==='projekte')ladeProjekte();}}
           style={{padding:'9px 18px',border:'none',borderRadius:'8px 8px 0 0',cursor:'pointer',fontFamily:'inherit',
             background:tab===t[0]?'#fff':'transparent',color:tab===t[0]?'#CC0000':'#666',
             fontWeight:tab===t[0]?700:500,fontSize:13,
@@ -1657,59 +1657,173 @@ function App(){
       );})}
     </div>)}
 
+    {/* ── PROJEKTE ── */}
+    {tab==='projekte'&&(
+    <div>
+      {/* Header */}
+      <div style={{...C.card,background:'#1a1a1a',color:'#fff',padding:'14px 18px',marginBottom:0}}>
+        <div style={{display:'flex',alignItems:'center',gap:12}}>
+          <div>
+            <div style={{fontWeight:800,fontSize:15,letterSpacing:.3}}>PROJEKTE</div>
+            <div style={{fontSize:11,color:'#8899aa'}}>{projekte.length} Projekte · Klick zum Wechseln</div>
+          </div>
+          <button onClick={function(){setTab('projekte');document.getElementById('neues-projekt-form').style.display=document.getElementById('neues-projekt-form').style.display==='block'?'none':'block';}}
+            style={{marginLeft:'auto',...C.btn('#CC0000'),fontSize:13,padding:'7px 16px'}}>
+            + Neues Projekt
+          </button>
+        </div>
+      </div>
+
+      {/* Neues Projekt Formular (anfangs ausgeblendet) */}
+      <div id="neues-projekt-form" style={{display:'none'}}>
+        <div style={{...C.card,background:'#FFF8F0',border:'1px solid #f0ddb0',margin:'0'}}>
+          <div style={C.sh}>Neues Projekt anlegen</div>
+          <NeuProjekt onSave={async function(name,bauNr,ort){
+            await projektErstellen(name,bauNr,ort);
+            document.getElementById('neues-projekt-form').style.display='none';
+          }}/>
+        </div>
+      </div>
+
+      {/* Projektliste */}
+      {projekte.length===0&&(
+        <div style={{...C.card,textAlign:'center',padding:40,color:'#aaa'}}>
+          <div style={{fontSize:36,marginBottom:12}}>📁</div>
+          <div style={{fontWeight:600,fontSize:15,color:'#999',marginBottom:8}}>Noch keine Projekte</div>
+          <div style={{fontSize:13,color:'#bbb'}}>Klicke "+ Neues Projekt" um zu starten</div>
+        </div>
+      )}
+
+      {projekte.map(function(p){
+        var istAktiv=aktivProjekt&&aktivProjekt.id===p.id;
+        return(
+        <div key={p.id} style={{...C.card,padding:0,overflow:'hidden',marginBottom:10,
+          border: istAktiv?'2px solid #CC0000':'2px solid transparent',
+          boxShadow: istAktiv?'0 0 0 1px rgba(204,0,0,.1)':'0 1px 4px rgba(0,0,0,.07)'}}>
+          {/* Projekt Header */}
+          <div style={{background:istAktiv?'#CC0000':'#f9f8f7',padding:'14px 18px',display:'flex',alignItems:'center',gap:12,cursor:'pointer'}}
+            onClick={function(){setAktivProjekt(p);ladeBlattNr(p.id);setForm(mkForm());setMsgs([]);setTab('chat');}}>
+            <div style={{width:40,height:40,borderRadius:10,background:istAktiv?'rgba(255,255,255,.2)':'#e8e5e0',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,flexShrink:0}}>
+              🏗
+            </div>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontWeight:700,fontSize:15,color:istAktiv?'#fff':'#1a1a1a',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
+                {istAktiv&&'★ '}{p.name}
+              </div>
+              <div style={{fontSize:11,color:istAktiv?'rgba(255,255,255,.8)':'#888',marginTop:2}}>
+                {p.bau_nr?'Bau-Nr. '+p.bau_nr+' · ':''}
+                {p.ort||'Kein Ort eingetragen'}
+              </div>
+            </div>
+            <div style={{fontSize:11,padding:'4px 10px',borderRadius:10,background:istAktiv?'rgba(255,255,255,.2)':'#e8e5e0',color:istAktiv?'#fff':'#888',fontWeight:600,flexShrink:0}}>
+              {istAktiv?'Aktiv':'Wechseln →'}
+            </div>
+          </div>
+
+          {/* Projekt Details (nur wenn aktiv) */}
+          {istAktiv&&(
+          <div style={{padding:'14px 18px',background:'#fff',borderTop:'1px solid #f0efed'}}>
+            <ProjektEinstellungen projekt={p} token={token} onUpdate={function(updated){
+              setAktivProjekt(updated);ladeProjekte();
+            }}/>
+            <div style={{display:'flex',gap:8,marginTop:12,paddingTop:12,borderTop:'1px solid #f5f4f2'}}>
+              <button onClick={function(){projektArchivieren(p);}}
+                title="Projekt ausblenden (bleibt in Datenbank)"
+                style={{...C.btn('#555'),fontSize:12,padding:'7px 14px'}}>
+                Ausblenden
+              </button>
+              <button onClick={function(){projektLoeschen(p);}}
+                title="Projekt und alle Berichte endgültig löschen"
+                style={{...C.btn('#8B1A1A'),fontSize:12,padding:'7px 14px'}}>
+                Endgültig löschen
+              </button>
+            </div>
+          </div>
+          )}
+
+          {/* Nicht-aktives Projekt: nur Statistik zeigen */}
+          {!istAktiv&&(
+          <div style={{padding:'10px 18px',background:'#fff',borderTop:'1px solid #f5f4f2',display:'flex',gap:16,alignItems:'center'}}>
+            <div style={{fontSize:12,color:'#888'}}>
+              Status: <strong style={{color:p.status==='aktiv'?'#2E7D32':'#888'}}>{p.status||'aktiv'}</strong>
+            </div>
+            <div style={{fontSize:12,color:'#888'}}>
+              {p.lat?'📍 Koordinaten gesetzt':'📍 Kein Ort'}
+            </div>
+            <div style={{marginLeft:'auto',display:'flex',gap:6}}>
+              <button onClick={function(){projektArchivieren(p);}}
+                style={{...C.btn('#888'),fontSize:11,padding:'4px 8px'}}>Ausblenden</button>
+              <button onClick={function(){projektLoeschen(p);}}
+                style={{...C.btn('#8B1A1A'),fontSize:11,padding:'4px 8px'}}>Löschen</button>
+            </div>
+          </div>
+          )}
+        </div>
+        );
+      })}
+
+      {/* Archivierte Projekte wiederherstellen */}
+      <div style={{...C.card,background:'#f9f8f7',border:'1px dashed #ddd',padding:'12px 18px',cursor:'pointer',marginTop:4}}
+        onClick={async function(){
+          try{
+            var alle=await sb.select('projekte',token,'order=erstellt_am.desc');
+            var arch=Array.isArray(alle)?alle.filter(function(p){return p.status==='archiviert';}):[]; 
+            if(arch.length===0){alert('Keine ausgeblendeten Projekte vorhanden.');return;}
+            var namen=arch.map(function(p){return p.name;}).join(', ');
+            if(window.confirm('Ausgeblendete Projekte: '+namen+'\n\nAlle wiederherstellen?')){
+              for(var i=0;i<arch.length;i++){
+                await sb.update('projekte',token,{status:'aktiv'},'id=eq.'+arch[i].id);
+              }
+              ladeProjekte();
+              alert(arch.length+' Projekt(e) wiederhergestellt!');
+            }
+          }catch(e){alert('Fehler: '+e.message);}
+        }}>
+        <div style={{fontSize:12,color:'#888',textAlign:'center'}}>
+          📂 Ausgeblendete Projekte wiederherstellen
+        </div>
+      </div>
+    </div>
+    )}
+
     {tab==='setup'&&(
     <div>
-      {/* Aktuelles Projekt konfigurieren */}
-      {aktivProjekt&&<div style={{...C.card,background:'#FFF8F0',border:'1px solid #f0ddb0',padding:'12px 16px',marginBottom:10}}>
-        <span style={{fontSize:13,color:'#8B6914',fontWeight:700}}>Einstellungen für: {aktivProjekt.name}</span>
-      </div>}
-      {aktivProjekt&&<ProjektEinstellungen projekt={aktivProjekt} token={token} onUpdate={function(updated){
-        setAktivProjekt(updated);
-        ladeProjekte();
-      }}/>}
       {/* Profil */}
       <div style={C.card}><div style={C.sh}>Mein Profil</div>
-        <div style={{fontSize:13,color:'#555',lineHeight:2}}>
+        <div style={{fontSize:13,color:'#555',lineHeight:2.2}}>
           <div>Name: <strong>{profil?profil.name:''}</strong></div>
           <div>E-Mail: <strong>{user?user.email:''}</strong></div>
           <div>Rolle: <strong style={{color:'#CC0000'}}>{profil?profil.rolle:'wird zugewiesen'}</strong></div>
+          <div>Aktives Projekt: <strong>{aktivProjekt?aktivProjekt.name:'—'}</strong></div>
+        </div>
+        <button onClick={logout} style={{...C.btn('#555'),width:'100%',padding:11,marginTop:12,fontSize:13}}>
+          Abmelden
+        </button>
+      </div>
+
+      {/* Schnellnavigation */}
+      <div style={C.card}><div style={C.sh}>Schnellzugriff</div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+          {[
+            ['chat','💬 Chat öffnen'],
+            ['projekte','📁 Projekte verwalten'],
+            ['archiv','📂 Archiv öffnen'],
+            ['form','📋 Neuer Bericht'],
+          ].map(function(t){return(
+            <button key={t[0]} onClick={function(){setTab(t[0]);if(t[0]==='archiv')ladeArchiv();if(t[0]==='projekte')ladeProjekte();}}
+              style={{...C.btn('#f0efed'),color:'#333',fontSize:13,padding:'11px',textAlign:'left',fontWeight:500}}>
+              {t[1]}
+            </button>
+          );})}
         </div>
       </div>
-      {/* Neues Projekt */}
-      <div style={C.card}><div style={C.sh}>Neues Projekt anlegen</div>
-        <NeuProjekt onSave={projektErstellen}/>
-      </div>
-      {/* Alle Projekte */}
-      <div style={C.card}><div style={C.sh}>Projekte</div>
-        {projekte.length===0&&<div style={{fontSize:13,color:'#888'}}>Noch keine Projekte. Oben anlegen.</div>}
-        {projekte.map(function(p){return(
-          <div key={p.id} style={{display:'flex',alignItems:'center',gap:8,padding:'10px 0',borderBottom:'1px solid #f0efed',flexWrap:'wrap'}}>
-            <div style={{flex:1,minWidth:120}}>
-              <div style={{fontWeight:700,fontSize:13}}>{p.name}</div>
-              <div style={{fontSize:11,color:'#888'}}>{p.bau_nr||'Keine Bau-Nr.'} · {p.ort||''}</div>
-            </div>
-            <button onClick={function(){setAktivProjekt(p);setTab('chat');}}
-              style={{...C.btn(aktivProjekt&&aktivProjekt.id===p.id?'#CC0000':'#888'),fontSize:11,padding:'4px 10px'}}>
-              {aktivProjekt&&aktivProjekt.id===p.id?'★ Aktiv':'Wechseln'}
-            </button>
-            <button onClick={function(){projektArchivieren(p);}}
-              title="Projekt ausblenden (wiederherstellbar)"
-              style={{...C.btn('#555'),fontSize:11,padding:'4px 8px'}}>
-              Ausblenden
-            </button>
-            <button onClick={function(){projektLoeschen(p);}}
-              title="Projekt endgültig löschen"
-              style={{...C.btn('#8B1A1A'),fontSize:11,padding:'4px 8px'}}>
-              Löschen
-            </button>
-          </div>
-        );})}
-      </div>
-      <div style={{...C.card,background:'#F0F8FF',border:'1px solid #c0d8f0'}}><div style={C.sh}>Desktop-Verknuepfung</div>
+
+      {/* App installieren */}
+      <div style={{...C.card,background:'#F0F8FF',border:'1px solid #c0d8f0'}}><div style={C.sh}>App installieren</div>
         <ol style={{fontSize:13,color:'#555',lineHeight:2.2,paddingLeft:20}}>
-          <li>Diese Seite in Chrome oder Safari oeffnen</li>
-          <li>Chrome: Menue → Weitere Tools → Verknuepfung erstellen</li>
-          <li>Safari (iPhone): Teilen → Zum Home-Bildschirm</li>
+          <li>Diese Seite in Chrome oder Safari öffnen</li>
+          <li>Chrome: Menü → Weitere Tools → Verknüpfung erstellen</li>
+          <li>Safari iPhone: Teilen → Zum Home-Bildschirm</li>
         </ol>
       </div>
     </div>
