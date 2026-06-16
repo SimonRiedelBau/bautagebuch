@@ -34,7 +34,7 @@ button:hover:not(:disabled){filter:brightness(.92)}
 @media(display-mode:standalone){#pwa-btn{display:none!important}}
 </style>
 <script>
-if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9ImJ0Yi12MjAiO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiaW5zdGFsbCIsZT0+e2Uud2FpdFVudGlsKGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGM9PmMuYWRkQWxsKFsiLi8iXSkpLnRoZW4oKCk9PnNlbGYuc2tpcFdhaXRpbmcoKSkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiYWN0aXZhdGUiLGU9PntlLndhaXRVbnRpbChjbGllbnRzLmNsYWltKCkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiZmV0Y2giLGU9PntlLnJlc3BvbmRXaXRoKGNhY2hlcy5tYXRjaChlLnJlcXVlc3QpLnRoZW4ocj0+cnx8ZmV0Y2goZS5yZXF1ZXN0KS5jYXRjaCgoKT0+Y2FjaGVzLm1hdGNoKCIuLyIpKSkpO30pOw==");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
+if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9ImJ0Yi12MjIiO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiaW5zdGFsbCIsZT0+e2Uud2FpdFVudGlsKGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGM9PmMuYWRkQWxsKFsiLi8iXSkpLnRoZW4oKCk9PnNlbGYuc2tpcFdhaXRpbmcoKSkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiYWN0aXZhdGUiLGU9PntlLndhaXRVbnRpbChjbGllbnRzLmNsYWltKCkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiZmV0Y2giLGU9PntlLnJlc3BvbmRXaXRoKGNhY2hlcy5tYXRjaChlLnJlcXVlc3QpLnRoZW4ocj0+cnx8ZmV0Y2goZS5yZXF1ZXN0KS5jYXRjaCgoKT0+Y2FjaGVzLm1hdGNoKCIuLyIpKSkpO30pOw==");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
 let dp=null;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;setTimeout(()=>{const b=document.getElementById('pwa-btn');if(b)b.style.display='block';},2000);});
 function installPWA(){if(dp){dp.prompt();dp.userChoice.then(()=>{dp=null;const b=document.getElementById('pwa-btn');if(b)b.style.display='none';});}else{alert('iPhone: Teile-Symbol tippen, dann Zum Home-Bildschirm');}}
@@ -170,13 +170,29 @@ const sb={
     return sb.safeRequest(doReq);
   },
   async rpc(fn,token,params){
-    const r=await fetch(SB_URL+'/rest/v1/rpc/'+fn,{
-      method:'POST',headers:sb._h(token),body:JSON.stringify(params)
-    });
-    return r.json();
+    const doReq=async(tok)=>{
+      const r=await fetch(SB_URL+'/rest/v1/rpc/'+fn,{
+        method:'POST',
+        headers:{...sb._h(tok||token),'Prefer':'return=representation'},
+        body:JSON.stringify(params||{})
+      });
+      const d=await r.json();
+      if(d&&d.message)throw new Error(d.message);
+      return d;
+    };
+    return sb.safeRequest(doReq);
+  },
+  async remove(table,token,filter){
+    const doReq=async(tok)=>{
+      const r=await fetch(SB_URL+'/rest/v1/'+table+'?'+filter,{
+        method:'DELETE',headers:sb._h(tok||token)
+      });
+      if(!r.ok){const d=await r.json().catch(()=>({}));throw new Error(d.message||'Löschen fehlgeschlagen: '+r.status);}
+      return true;
+    };
+    return sb.safeRequest(doReq);
   }
 };
-;
 
 // ── Helpers ──────────────────────────────────────────────────────
 const pad=n=>String(n).padStart(2,'0');
@@ -312,18 +328,18 @@ function buildPDFDoc(form,projektName,bauNr,blattNr){
     var nuLines=(form.nachunternehmer||'').split('\n');
     nuLines.forEach(function(l,i){var ty=Y+(i+0.85)*LHN;if(ty<Y+NBH-2)doc.text(l,NUL+4,ty);});
     var CY=GYY+GT+10;CY+=6;CY=rbar(CY,'Ausgefuehrte Arbeiten:')+2;
-    var LH=14.5,tL=wrapText(form.ausgefuehrteArbeiten);
-    for(var i3=0;i3<15;i3++){var ly=CY+(i3+1)*LH;doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(56.7,ly,567.3,ly);
-      if(i3<tL.length){doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(0,0,0);doc.text(tL[i3],58.5,ly-LH*0.62);}}
-    CY+=15*LH+8;CY=rbar(CY,'Sonstiges / Besondere Vorkommnisse:')+2;
+    var LH=15,tL=wrapText(form.ausgefuehrteArbeiten);
+    for(var i3=0,nR=Math.max(12,tL.length+2);i3<nR;i3++){var ly=CY+(i3+1)*LH;doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(56.7,ly,567.3,ly);
+      if(i3<tL.length){doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(0,0,0);doc.text(tL[i3],58.5,ly-LH*0.35);}}
+    CY+=nR*LH+8;CY=rbar(CY,'Sonstiges / Besondere Vorkommnisse:')+2;
     var sL=wrapText(form.sonstiges);
-    for(var i4=0;i4<3;i4++){var ly2=CY+(i4+1)*LH;doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(56.8,ly2,567.1,ly2);
-      if(i4<sL.length){doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(0,0,0);doc.text(sL[i4],58.5,ly2-LH*0.62);}}
-    CY+=3*LH+8;CY=rbar(CY,'Besuche:')+2;
+    for(var i4=0,nS=Math.max(3,sL.length+1);i4<nS;i4++){var ly2=CY+(i4+1)*LH;doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(56.8,ly2,567.1,ly2);
+      if(i4<sL.length){doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(0,0,0);doc.text(sL[i4],58.5,ly2-LH*0.35);}}
+    CY+=nS*LH+8;CY=rbar(CY,'Besuche:')+2;
     var bL=wrapText(form.besucheText);
-    for(var i5=0;i5<2;i5++){var ly3=CY+(i5+1)*LH;doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(56.8,ly3,567.1,ly3);
-      if(i5<bL.length){doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(0,0,0);doc.text(bL[i5],58.5,ly3-LH*0.62);}}
-    CY+=2*LH+10;hl(CY,56.8,566.8,0.5);CY+=8;
+    for(var i5=0,nB=Math.max(2,bL.length+1);i5<nB;i5++){var ly3=CY+(i5+1)*LH;doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(56.8,ly3,567.1,ly3);
+      if(i5<bL.length){doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(0,0,0);doc.text(bL[i5],58.5,ly3-LH*0.35);}}
+    CY+=nB*LH+10;hl(CY,56.8,566.8,0.5);CY+=8;
     [[57,'Polier:','polier'],[207,'Bauleiter:','bauleiter'],[358,'Bauherr:','bauherr']].forEach(function(s){
       doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(0,0,0);doc.text(s[1],s[0],CY);
       doc.setFont('helvetica','normal');doc.setFontSize(9);doc.text(form.besuche[s[2]]||'',s[0]+45,CY);
@@ -332,10 +348,10 @@ function buildPDFDoc(form,projektName,bauNr,blattNr){
   }
   function anhang(){
     var Y=112;Y=rbar(Y,'Ausgefuehrte Arbeiten')+2;
-    var LH=14.5,tL=wrapText(form.ausgefuehrteArbeiten);
-    for(var i=0;i<22;i++){var ly=Y+(i+1)*LH;doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(56.7,ly,567.3,ly);
-      if(i<tL.length){doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(0,0,0);doc.text(tL[i],58.5,ly-LH*0.62);}}
-    var CY=Y+22*LH+8;hl(CY,56.8,566.8,0.5);CY+=8;
+    var LH=15,tL=wrapText(form.ausgefuehrteArbeiten);
+    for(var i=0,nA=Math.max(22,tL.length+2);i<nA;i++){var ly=Y+(i+1)*LH;doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(56.7,ly,567.3,ly);
+      if(i<tL.length){doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(0,0,0);doc.text(tL[i],58.5,ly-LH*0.35);}}
+    var CY=Y+nA*LH+8;hl(CY,56.8,566.8,0.5);CY+=8;
     [[57,'Polier'],[207,'Bauleiter'],[358,'Bauherr']].forEach(function(s){
       doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(0,0,0);doc.text(s[1],s[0],CY);hl(CY+10,s[0],s[0]+131,0.5);});
     CY+=18;hl(CY,56.8,566.8,0.5);
@@ -806,6 +822,7 @@ function App(){
 
   // Voice recording
   const [recording,setRecording]=useState(false);
+  const [pdfVorschau,setPdfVorschau]=useState(null);
   const [recorder,setRecorder]=useState(null);
   const mediaRef=useRef(null);
   const chatEnd=useRef(null);
@@ -1220,9 +1237,9 @@ function App(){
     if(!window.confirm('Wirklich endgültig löschen? Alle '+projekt.name+' Berichte gehen verloren.'))return;
     try{
       // Erst alle Berichte löschen
-      await sb.delete('berichte',token,'projekt_id=eq.'+projekt.id);
+      await sb.remove('berichte',token,'projekt_id=eq.'+projekt.id);
       // Dann Projekt löschen
-      await sb.delete('projekte',token,'id=eq.'+projekt.id);
+      await sb.remove('projekte',token,'id=eq.'+projekt.id);
       var d=await sb.select('projekte',token,'order=erstellt_am.desc');
       if(Array.isArray(d)){
         var aktive=d.filter(function(p){return p.status!=='archiviert';});
@@ -1537,12 +1554,19 @@ function App(){
       </div>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
         <button onClick={function(){exportBericht(false);}} disabled={saveStatus==='saving'}
-          style={{...C.btn('#555'),padding:14,fontSize:14,opacity:saveStatus==='saving'?.7:1}}>
+          style={{...C.btn('#555'),padding:14,fontSize:13,opacity:saveStatus==='saving'?.7:1}}>
           Als Entwurf speichern
         </button>
+        <button onClick={function(){
+          if(!aktivProjekt)return;
+          var doc=buildPDFDoc(form,aktivProjekt.name,aktivProjekt.bau_nr||'',blattNr);
+          setPdfVorschau(doc.output('datauristring'));
+        }} style={{...C.btn('#1565C0'),padding:14,fontSize:13}}>
+          PDF Vorschau
+        </button>
         <button onClick={function(){exportBericht(true);}} disabled={saveStatus==='saving'}
-          style={{...C.btn(),padding:14,fontSize:14,opacity:saveStatus==='saving'?.7:1}}>
-          Bestaetigen + PDF
+          style={{...C.btn(),padding:14,fontSize:13,opacity:saveStatus==='saving'?.7:1}}>
+          {saveStatus==='saving'?'Speichert...':saveStatus==='ok'?'Gespeichert!':'Bestätigen + PDF'}
         </button>
       </div>
     </div>
@@ -1837,7 +1861,31 @@ function App(){
       </div>
     </div>
     )}
-    </div>
+
+      {/* ── PDF VORSCHAU MODAL ── */}
+      {pdfVorschau&&(
+      <div style={{position:'fixed',top:0,left:0,right:0,bottom:0,background:'rgba(0,0,0,.75)',zIndex:9998,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:20}}>
+        <div style={{background:'#fff',borderRadius:14,width:'100%',maxWidth:960,height:'90vh',display:'flex',flexDirection:'column',boxShadow:'0 24px 80px rgba(0,0,0,.5)'}}>
+          <div style={{display:'flex',alignItems:'center',gap:12,padding:'14px 20px',borderBottom:'1px solid #eee',flexShrink:0}}>
+            <span style={{fontWeight:800,fontSize:16,color:'#1a1a1a',flex:1}}>📄 PDF Vorschau — Blatt {blattNr}</span>
+            <span style={{fontSize:12,color:'#888'}}>Zum Herunterladen und Drucken</span>
+            <button onClick={function(){
+              var doc=buildPDFDoc(form,aktivProjekt.name,aktivProjekt.bau_nr||'',blattNr);
+              doc.save('Bautagebuch_'+aktivProjekt.name.replace(/\s+/g,'-')+'_Blatt'+String(blattNr).padStart(3,'0')+'.pdf');
+            }} style={{padding:'8px 16px',background:'#CC0000',color:'#fff',border:'none',borderRadius:8,cursor:'pointer',fontWeight:700,fontSize:13,fontFamily:'inherit'}}>
+              ⬇ PDF speichern
+            </button>
+            <button onClick={function(){setPdfVorschau(null);}}
+              style={{padding:'8px 14px',background:'#f0efed',color:'#333',border:'none',borderRadius:8,cursor:'pointer',fontWeight:700,fontSize:15,fontFamily:'inherit'}}>
+              ✕
+            </button>
+          </div>
+          <iframe src={pdfVorschau} title="PDF Vorschau"
+            style={{flex:1,border:'none',borderRadius:'0 0 14px 14px',minHeight:0}}/>
+        </div>
+      </div>
+      )}
+  </div>
   </div>);
 }
 
@@ -1890,8 +1938,6 @@ function NeuProjekt({onSave}){
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
-
-
 </script>
 </body>
 </html>
