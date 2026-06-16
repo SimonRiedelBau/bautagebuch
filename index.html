@@ -34,7 +34,7 @@ button:hover:not(:disabled){filter:brightness(.92)}
 @media(display-mode:standalone){#pwa-btn{display:none!important}}
 </style>
 <script>
-if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9ImJ0Yi12MjIiO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiaW5zdGFsbCIsZT0+e2Uud2FpdFVudGlsKGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGM9PmMuYWRkQWxsKFsiLi8iXSkpLnRoZW4oKCk9PnNlbGYuc2tpcFdhaXRpbmcoKSkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiYWN0aXZhdGUiLGU9PntlLndhaXRVbnRpbChjbGllbnRzLmNsYWltKCkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiZmV0Y2giLGU9PntlLnJlc3BvbmRXaXRoKGNhY2hlcy5tYXRjaChlLnJlcXVlc3QpLnRoZW4ocj0+cnx8ZmV0Y2goZS5yZXF1ZXN0KS5jYXRjaCgoKT0+Y2FjaGVzLm1hdGNoKCIuLyIpKSkpO30pOw==");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
+if("serviceWorker" in navigator){const b=atob("Y29uc3QgQ0FDSEU9ImJ0Yi12MjMiO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiaW5zdGFsbCIsZT0+e2Uud2FpdFVudGlsKGNhY2hlcy5vcGVuKENBQ0hFKS50aGVuKGM9PmMuYWRkQWxsKFsiLi8iXSkpLnRoZW4oKCk9PnNlbGYuc2tpcFdhaXRpbmcoKSkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiYWN0aXZhdGUiLGU9PntlLndhaXRVbnRpbChjbGllbnRzLmNsYWltKCkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcigiZmV0Y2giLGU9PntlLnJlc3BvbmRXaXRoKGNhY2hlcy5tYXRjaChlLnJlcXVlc3QpLnRoZW4ocj0+cnx8ZmV0Y2goZS5yZXF1ZXN0KS5jYXRjaCgoKT0+Y2FjaGVzLm1hdGNoKCIuLyIpKSkpO30pOw==");const u=URL.createObjectURL(new Blob([b],{type:"application/javascript"}));navigator.serviceWorker.register(u);}
 let dp=null;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;setTimeout(()=>{const b=document.getElementById('pwa-btn');if(b)b.style.display='block';},2000);});
 function installPWA(){if(dp){dp.prompt();dp.userChoice.then(()=>{dp=null;const b=document.getElementById('pwa-btn');if(b)b.style.display='none';});}else{alert('iPhone: Teile-Symbol tippen, dann Zum Home-Bildschirm');}}
@@ -206,12 +206,21 @@ function getW(k){return k<5?'still':k<30?'maeßiger Wind':'starker Wind';}
 
 function wrapText(text,max){
   if(!text)return[];if(!max)max=106;
-  var words=text.split(' '),lines=[],cur='';
-  for(var i=0;i<words.length;i++){
-    var t=cur?cur+' '+words[i]:words[i];
-    if(t.length<=max)cur=t;else{if(cur)lines.push(cur);cur=words[i];}
+  var result=[];
+  // Split on newlines first (user may type multi-line text)
+  var paras=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+  for(var p=0;p<paras.length;p++){
+    var para=paras[p];
+    if(!para||!para.trim()){result.push('');continue;}
+    var words=para.split(' '),cur='';
+    for(var i=0;i<words.length;i++){
+      var t=cur?cur+' '+words[i]:words[i];
+      if(t.length<=max)cur=t;
+      else{if(cur)result.push(cur);cur=words[i];}
+    }
+    if(cur)result.push(cur);
   }
-  if(cur)lines.push(cur);return lines;
+  return result;
 }
 
 // Fehlende Pflichtfelder prüfen
@@ -330,15 +339,15 @@ function buildPDFDoc(form,projektName,bauNr,blattNr){
     var CY=GYY+GT+10;CY+=6;CY=rbar(CY,'Ausgefuehrte Arbeiten:')+2;
     var LH=15,tL=wrapText(form.ausgefuehrteArbeiten);
     for(var i3=0,nR=Math.max(12,tL.length+2);i3<nR;i3++){var ly=CY+(i3+1)*LH;doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(56.7,ly,567.3,ly);
-      if(i3<tL.length){doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(0,0,0);doc.text(tL[i3],58.5,ly-LH*0.35);}}
+      if(i3<tL.length){doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(0,0,0);doc.text((tL[i3]||'').replace(/\n/g,' ').replace(/\r/g,' '),58.5,ly-LH*0.35);}}
     CY+=nR*LH+8;CY=rbar(CY,'Sonstiges / Besondere Vorkommnisse:')+2;
     var sL=wrapText(form.sonstiges);
     for(var i4=0,nS=Math.max(3,sL.length+1);i4<nS;i4++){var ly2=CY+(i4+1)*LH;doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(56.8,ly2,567.1,ly2);
-      if(i4<sL.length){doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(0,0,0);doc.text(sL[i4],58.5,ly2-LH*0.35);}}
+      if(i4<sL.length){doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(0,0,0);doc.text((sL[i4]||'').replace(/\n/g,' ').replace(/\r/g,' '),58.5,ly2-LH*0.35);}}
     CY+=nS*LH+8;CY=rbar(CY,'Besuche:')+2;
     var bL=wrapText(form.besucheText);
     for(var i5=0,nB=Math.max(2,bL.length+1);i5<nB;i5++){var ly3=CY+(i5+1)*LH;doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(56.8,ly3,567.1,ly3);
-      if(i5<bL.length){doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(0,0,0);doc.text(bL[i5],58.5,ly3-LH*0.35);}}
+      if(i5<bL.length){doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(0,0,0);doc.text((bL[i5]||'').replace(/\n/g,' ').replace(/\r/g,' '),58.5,ly3-LH*0.35);}}
     CY+=nB*LH+10;hl(CY,56.8,566.8,0.5);CY+=8;
     [[57,'Polier:','polier'],[207,'Bauleiter:','bauleiter'],[358,'Bauherr:','bauherr']].forEach(function(s){
       doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(0,0,0);doc.text(s[1],s[0],CY);
@@ -350,7 +359,7 @@ function buildPDFDoc(form,projektName,bauNr,blattNr){
     var Y=112;Y=rbar(Y,'Ausgefuehrte Arbeiten')+2;
     var LH=15,tL=wrapText(form.ausgefuehrteArbeiten);
     for(var i=0,nA=Math.max(22,tL.length+2);i<nA;i++){var ly=Y+(i+1)*LH;doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(56.7,ly,567.3,ly);
-      if(i<tL.length){doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(0,0,0);doc.text(tL[i],58.5,ly-LH*0.35);}}
+      if(i<tL.length){doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(0,0,0);doc.text((tL[i]||'').replace(/\n/g,' ').replace(/\r/g,' '),58.5,ly-LH*0.35);}}
     var CY=Y+nA*LH+8;hl(CY,56.8,566.8,0.5);CY+=8;
     [[57,'Polier'],[207,'Bauleiter'],[358,'Bauherr']].forEach(function(s){
       doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(0,0,0);doc.text(s[1],s[0],CY);hl(CY+10,s[0],s[0]+131,0.5);});
