@@ -252,14 +252,70 @@ function App(){
     if(!aktivProjekt||!aktivProjekt.lat)return;
     setWload(true);
     try{
-      var r=await fetch('https://api.open-meteo.com/v1/forecast?latitude='+aktivProjekt.lat+'&longitude='+aktivProjekt.lon+'&hourly=temperature_2m,weathercode,windspeed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=Europe/Berlin&forecast_days=1');
+      // Datum aus Formular lesen (DD.MM.YYYY)
+      var datumRaw=form.datum||'';
+      var isoDate;
+      if(datumRaw&&datumRaw.match(/^\d{2}\.\d{2}\.\d{4}$/)){
+        var p=datumRaw.split('.');
+        isoDate=p[2]+'-'+p[1]+'-'+p[0];
+      } else {
+        isoDate=new Date().toISOString().split('T')[0];
+      }
+      var heute=new Date().toISOString().split('T')[0];
+      var istVergangenheit=isoDate<heute;
+      var istZukunft=isoDate>heute;
+      var url;
+      if(istVergangenheit){
+        url='https://archive-api.open-meteo.com/v1/archive?latitude='+aktivProjekt.lat
+          +'&longitude='+aktivProjekt.lon
+          +'&start_date='+isoDate+'&end_date='+isoDate
+          +'&hourly=temperature_2m,weathercode,windspeed_10m'
+          +'&daily=temperature_2m_max,temperature_2m_min'
+          +'&timezone=Europe/Berlin';
+      } else {
+        var daysAhead=istZukunft?Math.min(16,Math.ceil((new Date(isoDate)-new Date(heute))/86400000)+1):1;
+        url='https://api.open-meteo.com/v1/forecast?latitude='+aktivProjekt.lat
+          +'&longitude='+aktivProjekt.lon
+          +'&hourly=temperature_2m,weathercode,windspeed_10m'
+          +'&daily=temperature_2m_max,temperature_2m_min'
+          +'&timezone=Europe/Berlin&forecast_days='+daysAhead;
+      }
+      var r=await fetch(url);
       var d=await r.json();
-      var code=d.hourly.weathercode[7]||0;
-      var avg=(d.hourly.windspeed_10m[7]+d.hourly.windspeed_10m[12]+d.hourly.windspeed_10m[16])/3;
-      var w={temp7:Math.round(d.hourly.temperature_2m[7])+'°C',temp12:Math.round(d.hourly.temperature_2m[12])+'°C',temp16:Math.round(d.hourly.temperature_2m[16])+'°C',tempMax:Math.round(d.daily.temperature_2m_max[0])+'°C',tempMin:Math.round(d.daily.temperature_2m_min[0])+'°C',niederschlag:getN(code),luftbewegung:getW(avg),wBeschreibung:WMO[code]||'Unbekannt'};
+      // Stunden-Index für das gesuchte Datum
+      var times=d.hourly.time||[];
+      var h7=-1,h12=-1,h16=-1;
+      for(var ti=0;ti<times.length;ti++){
+        if(times[ti].startsWith(isoDate+'T07'))h7=ti;
+        if(times[ti].startsWith(isoDate+'T12'))h12=ti;
+        if(times[ti].startsWith(isoDate+'T16'))h16=ti;
+      }
+      if(h7<0)h7=7; if(h12<0)h12=12; if(h16<0)h16=16;
+      // Tages-Index
+      var dailyDates=d.daily?d.daily.time||[]:[];
+      var dayIdx=dailyDates.indexOf(isoDate);
+      if(dayIdx<0)dayIdx=0;
+      var code=(d.hourly.weathercode&&d.hourly.weathercode[h12])||0;
+      var ws7=(d.hourly.windspeed_10m&&d.hourly.windspeed_10m[h7])||0;
+      var ws12=(d.hourly.windspeed_10m&&d.hourly.windspeed_10m[h12])||0;
+      var ws16=(d.hourly.windspeed_10m&&d.hourly.windspeed_10m[h16])||0;
+      var avg=(ws7+ws12+ws16)/3;
+      var w={
+        temp7:Math.round((d.hourly.temperature_2m&&d.hourly.temperature_2m[h7])||0)+'°C',
+        temp12:Math.round((d.hourly.temperature_2m&&d.hourly.temperature_2m[h12])||0)+'°C',
+        temp16:Math.round((d.hourly.temperature_2m&&d.hourly.temperature_2m[h16])||0)+'°C',
+        tempMax:Math.round((d.daily&&d.daily.temperature_2m_max&&d.daily.temperature_2m_max[dayIdx])||0)+'°C',
+        tempMin:Math.round((d.daily&&d.daily.temperature_2m_min&&d.daily.temperature_2m_min[dayIdx])||0)+'°C',
+        niederschlag:getN(code),
+        luftbewegung:getW(avg),
+        wBeschreibung:WMO[code]||'Unbekannt'
+      };
       setForm(f=>({...f,...w}));
-      setMsgs(m=>[...m,{role:'assistant',content:'Wetter: '+w.wBeschreibung+' · '+w.temp7+'→'+w.tempMax+' · '+w.luftbewegung}]);
-    }catch(e){}
+      var typ=istVergangenheit?' (historisch)':istZukunft?' (Vorhersage)':' (heute)';
+      setMsgs(m=>[...m,{role:'assistant',content:'Wetter für '+datumRaw+': '+w.temp7+' / '+w.temp12+' / '+w.temp16+' — max '+w.tempMax+', min '+w.tempMin+' — '+(w.niederschlag||'kein Niederschlag')+', '+w.luftbewegung+typ}]);
+    }catch(e){
+      setMsgs(m=>[...m,{role:'assistant',content:'Wetter konnte nicht geladen werden: '+e.message}]);
+    }
     setWload(false);
   }
 
